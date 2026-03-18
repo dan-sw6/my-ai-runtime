@@ -114,6 +114,10 @@ entries:
     target: .claude/templates/closeout.md
     mode: template
 
+  - source: shared/templates/srs.md
+    target: .claude/templates/srs.md
+    mode: template
+
 # Files NEVER synced (product-only, listed for documentation)
 exclusions:
   - CLAUDE.md

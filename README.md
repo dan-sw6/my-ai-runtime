@@ -9,19 +9,25 @@ This repository provides shared templates, base agent definitions, quality gates
 ## Structure
 
 ```
-docs/                  Architecture and onboarding guides
-shared/templates/      Reusable story, task, handoff, closeout templates
-shared/quality-gates/  Definition of Done, MCP matrix
-shared/playbooks/      Operational playbooks (closed-loop, corrective, setup)
-claude/agents/_base/   Base Claude Code subagent definitions
-claude/skills/         Base Claude Code skill definitions
-claude/settings/       Base Claude settings templates
-claude/rules/          Shared safety, git, scope, secret rules
-codex/agents/          Base Codex agent profiles
-codex/prompts/         Base Codex role prompts
-codex/templates/       Base governance templates (AGENTS.md, bmad)
-bootstrap/             Scripts to scaffold a new product repo
-sync/                  Sync manifest and engine
+claude/                    Claude Code runtime (PRIMARY)
+├── agents/_base/          Base subagent definitions (12 agents, VoltAgent-sourced)
+├── skills/                Base skill definitions (closed-loop coordinator, etc.)
+├── rules/                 Shared safety, git, scope, secret rules
+└── settings/              Base settings templates
+
+shared/                    Shared resources
+├── quality-gates/         Definition of Done, MCP matrix
+├── playbooks/             Operational playbooks (closed-loop, corrective, setup)
+└── templates/             Story, task, handoff, closeout templates
+
+codex/                     Codex runtime (SECONDARY, legacy)
+├── agents/                Base Codex agent profiles
+├── prompts/               Base Codex role prompts
+└── templates/             Governance templates (AGENTS.md, bmad)
+
+bootstrap/                 Scripts to scaffold new product repos
+sync/                      Sync manifest and engine
+docs/                      Architecture and onboarding guides
 ```
 
 ## Sync Model
@@ -51,3 +57,18 @@ bash scripts/sync-ai-runtime.sh --force      # Overwrite even seed files
 ```bash
 bash ../mgt-ai-runtime/bootstrap/init-product-repo.sh /path/to/product-repo
 ```
+
+## Closed-Loop Delivery
+
+The primary delivery model is Claude-native closed loop (Variant C — skill-as-coordinator):
+
+```
+/implement-story STORY-ID
+  → PLAN (story-planner, read-only)
+  → IMPLEMENT (specialist subagents)
+  → GATE (bash quality gates, auto-fix)
+  → VERIFY (qa-expert, adversarial)
+  → PASS / corrective loop
+```
+
+See `shared/playbooks/closed-loop-cycle.md` and `docs/ARCHITECTURE.md` for details.
