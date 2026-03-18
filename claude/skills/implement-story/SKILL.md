@@ -1,10 +1,7 @@
-# Skill: implement-story (base)
-# Closed-loop story delivery coordinator (Variant C).
-# Product repos should customize story paths, gate commands, and agent names.
 ---
 name: implement-story
-description: "Closed-loop story delivery — coordinate planner, implementer, and controller phases with autonomous decision-making."
-trigger: "/implement-story <STORY-ID>"
+description: "Closed-loop story delivery — coordinate planner, implementer, and controller phases with autonomous decision-making. Product repos should customize story paths, gate commands, and agent names."
+argument-hint: "<STORY-ID>"
 ---
 
 ## Role

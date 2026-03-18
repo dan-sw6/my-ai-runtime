@@ -1,9 +1,7 @@
-# Skill: verify-story (base)
-# Verify story completion against acceptance criteria.
 ---
 name: verify-story
 description: "Verify a story is complete — criteria, gates, Definition of Done."
-trigger: "/verify-story <STORY-ID>"
+argument-hint: "<STORY-ID>"
 ---
 
 ## Workflow

@@ -1,9 +1,7 @@
-# Skill: update-rtm (base)
-# Update Requirements Traceability Matrix after changes.
 ---
 name: update-rtm
 description: "Update RTM to reflect current implementation status."
-trigger: "/update-rtm [scope]"
+argument-hint: "[scope]"
 ---
 
 ## Workflow

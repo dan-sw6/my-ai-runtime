@@ -1,9 +1,7 @@
-# Skill: audit-frontend (base)
-# Audit frontend code quality and accessibility.
 ---
 name: audit-frontend
 description: "Audit frontend for patterns, TypeScript, accessibility, and design system."
-trigger: "/audit-frontend [path]"
+argument-hint: "[path]"
 ---
 
 ## Workflow
