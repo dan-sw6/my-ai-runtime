@@ -1,0 +1,39 @@
+# Handoff: Planner → Implementer
+# Canonical handoff schema for closed-loop agent workflow.
+
+handoff:
+  from: planner
+  to: implementer
+  timestamp: null
+  story_ref: "STORY-XXX"
+
+  # What to implement
+  tasks:
+    - task_id: "TASK-XXX"
+      title: ""
+      module: ""
+      description: |
+        Clear implementation instructions.
+      files_to_modify: []
+      files_to_create: []
+      requirement_refs: []
+      constraints: []
+
+  # Execution order
+  execution:
+    mode: sequential  # sequential | parallel
+    wave_barriers: [] # For parallel: which tasks must complete before next wave
+
+  # Context the implementer needs
+  context:
+    srs_sections: []
+    architecture_refs: []
+    existing_patterns: []
+
+  # Quality expectations
+  quality:
+    run_after_each_task:
+      - lint
+      - typecheck
+    run_after_all_tasks:
+      - full_test_suite

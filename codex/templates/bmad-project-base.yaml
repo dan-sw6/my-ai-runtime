@@ -1,0 +1,23 @@
+# Base bmad/project.yaml template
+# Customize for your project.
+
+bmad:
+  version: "6.0.0"
+  project:
+    name: "[PROJECT_NAME]"
+    type: web-app
+    level: 4  # 1=simple, 5=complex
+    language: en  # Communication language
+  phases:
+    planning:
+      required: true
+      artifacts: [product-brief, prd, architecture, ux-design]
+    gate_check:
+      required: true
+      artifacts: [gate-check]
+    sprint_planning:
+      required: true
+      artifacts: [sprint-plan]
+    implementation:
+      required: true
+      workflow: closed-loop

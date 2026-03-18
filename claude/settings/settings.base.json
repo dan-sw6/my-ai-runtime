@@ -1,0 +1,12 @@
+{
+  "$comment": "Base Claude settings template. Product repos should customize mcpServers for their environment.",
+  "mcpServers": {
+    "serena": {
+      "$comment": "Code navigation — configure command and args per project"
+    },
+    "context7": {
+      "command": "npx",
+      "args": ["-y", "@upstash/context7-mcp@latest"]
+    }
+  }
+}

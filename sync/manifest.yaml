@@ -1,0 +1,133 @@
+# Sync Manifest — mgt-ai-runtime → product repos
+# Direction: one-way (runtime → product)
+# Modes:
+#   seed     — create target only if missing (project customizations preserved)
+#   managed  — always overwrite (runtime owns these files)
+#   template — create if missing, warn if source newer
+
+schema_version: "1.0"
+sync_direction: runtime_to_product
+
+entries:
+  # === Claude Agents (seed — project customizes after initial creation) ===
+  - source: claude/agents/_base/frontend-developer.md
+    target: .claude/agents/frontend-developer.md
+    mode: seed
+
+  - source: claude/agents/_base/ui-designer.md
+    target: .claude/agents/ui-designer.md
+    mode: seed
+
+  - source: claude/agents/_base/typescript-pro.md
+    target: .claude/agents/typescript-pro.md
+    mode: seed
+
+  - source: claude/agents/_base/react-specialist.md
+    target: .claude/agents/react-specialist.md
+    mode: seed
+
+  - source: claude/agents/_base/backend-developer.md
+    target: .claude/agents/backend-developer.md
+    mode: seed
+
+  - source: claude/agents/_base/python-pro.md
+    target: .claude/agents/python-pro.md
+    mode: seed
+
+  - source: claude/agents/_base/code-reviewer.md
+    target: .claude/agents/code-reviewer.md
+    mode: seed
+
+  - source: claude/agents/_base/architect-reviewer.md
+    target: .claude/agents/architect-reviewer.md
+    mode: seed
+
+  - source: claude/agents/_base/qa-expert.md
+    target: .claude/agents/qa-expert.md
+    mode: seed
+
+  - source: claude/agents/_base/accessibility-tester.md
+    target: .claude/agents/accessibility-tester.md
+    mode: seed
+
+  - source: claude/agents/_base/documentation-engineer.md
+    target: .claude/agents/documentation-engineer.md
+    mode: seed
+
+  - source: claude/agents/_base/legacy-modernizer.md
+    target: .claude/agents/legacy-modernizer.md
+    mode: seed
+
+  # === Claude Skills (seed) ===
+  - source: claude/skills/implement-story/SKILL.md
+    target: .claude/skills/implement-story.md
+    mode: seed
+
+  - source: claude/skills/verify-story/SKILL.md
+    target: .claude/skills/verify-story.md
+    mode: seed
+
+  - source: claude/skills/update-rtm/SKILL.md
+    target: .claude/skills/update-rtm.md
+    mode: seed
+
+  - source: claude/skills/audit-frontend/SKILL.md
+    target: .claude/skills/audit-frontend.md
+    mode: seed
+
+  # === Quality Gates (managed — runtime owns these) ===
+  - source: shared/quality-gates/definition-of-done.yaml
+    target: .claude/quality-gates/definition-of-done.yaml
+    mode: managed
+
+  - source: shared/quality-gates/mcp-matrix.yaml
+    target: .claude/quality-gates/mcp-matrix.yaml
+    mode: managed
+
+  # === Rules (managed — runtime owns these) ===
+  - source: claude/rules/safety.md
+    target: .claude/rules/safety.md
+    mode: managed
+
+  - source: claude/rules/git-workflow.md
+    target: .claude/rules/git-workflow.md
+    mode: managed
+
+  - source: claude/rules/module-scope.md
+    target: .claude/rules/module-scope.md
+    mode: managed
+
+  - source: claude/rules/secret-handling.md
+    target: .claude/rules/secret-handling.md
+    mode: managed
+
+  # === Templates (template — create if missing, warn if stale) ===
+  - source: shared/templates/story.yaml
+    target: .claude/templates/story.yaml
+    mode: template
+
+  - source: shared/templates/task-brief.yaml
+    target: .claude/templates/task-brief.yaml
+    mode: template
+
+  - source: shared/templates/closeout.md
+    target: .claude/templates/closeout.md
+    mode: template
+
+# Files NEVER synced (product-only, listed for documentation)
+exclusions:
+  - CLAUDE.md
+  - AGENTS.md
+  - agents/*
+  - .codex/*
+  - bmad/*
+  - tasks/*
+  - docs/SRS.md
+  - docs/rtm.yaml
+  - docs/RTM.md
+  - docs/NOW.md
+  - docs/BACKLOG.md
+  - docs/DECISIONS.md
+  - docs/prompts/*
+  - docs/stories/*
+  - docs/bmad/*

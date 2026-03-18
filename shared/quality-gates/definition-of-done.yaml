@@ -1,0 +1,56 @@
+# Definition of Done — Reusable Quality Gate
+# Parameterized for any project. Product repo may override thresholds.
+
+version: "1.0"
+
+# Every story must pass ALL of these before marking as done
+gates:
+  code_quality:
+    - id: lint
+      description: "All linting rules pass (no errors)"
+      command_template: "bash scripts/lint.sh"
+      required: true
+
+    - id: typecheck
+      description: "Static type checking passes"
+      command_template: "bash scripts/type.sh"
+      required: true
+
+    - id: no_secrets
+      description: "No secrets, credentials, or tokens in committed code"
+      check: manual_or_automated
+      required: true
+
+  testing:
+    - id: unit_tests
+      description: "All unit tests pass"
+      command_template: "bash scripts/test.sh --fast"
+      required: true
+
+    - id: relevant_tests_added
+      description: "New/modified code has corresponding test coverage"
+      check: manual
+      required: true
+
+  traceability:
+    - id: rtm_updated
+      description: "RTM reflects current implementation status for touched requirements"
+      check: manual
+      required: true
+
+    - id: acceptance_criteria_met
+      description: "Every acceptance criterion in the story is verifiably satisfied"
+      check: manual
+      required: true
+
+  documentation:
+    - id: no_stale_docs
+      description: "Changed behavior is reflected in relevant docs (if any exist)"
+      check: manual
+      required: false  # Advisory, not blocking
+
+  integration:
+    - id: build_succeeds
+      description: "Production build completes without errors"
+      command_template: "bash scripts/test.sh"
+      required: true

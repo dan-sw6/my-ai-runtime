@@ -1,0 +1,36 @@
+# Base Task Brief Template
+# Used by planner agents to define implementation work units.
+
+id: "TASK-XXX"
+story_ref: "STORY-XXX"
+title: ""
+status: pending  # pending | in_progress | done | blocked | cancelled
+
+# Scope
+module: ""           # Target module/contour
+files_to_modify: []  # Expected files to touch
+files_to_create: []  # New files needed
+
+# Requirements
+requirement_refs: []
+source_refs: []      # SRS sections, doc paths
+
+# Implementation spec
+description: |
+  What needs to be done and why.
+
+constraints:
+  - ""  # Boundaries, things to avoid
+
+# Verification
+verification:
+  tests: []          # Test files to run
+  quality_gates:
+    - lint
+    - typecheck
+    - unit_tests
+  manual_checks: []  # Human verification steps
+
+# Execution
+execution_order: sequential  # sequential | parallel
+depends_on: []

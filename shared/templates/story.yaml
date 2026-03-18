@@ -1,0 +1,31 @@
+# Base Story Template
+# Adapt field names and required sections to your project's BMAD workflow.
+
+id: "STORY-XXX"
+title: ""
+status: draft  # draft | ready | in_progress | done | blocked
+priority: medium  # low | medium | high | critical
+sprint: null
+story_points: null
+
+# Requirements traceability
+requirement_refs: []  # e.g., ["FR-AUTH-001", "NFR-PERF-003"]
+
+# Description
+description: |
+  As a [role],
+  I want [capability],
+  so that [benefit].
+
+# Acceptance criteria (testable, specific)
+acceptance_criteria:
+  - criterion: ""
+    verification: ""  # How to verify (test, manual check, query)
+
+# Technical notes
+technical_notes: |
+  Implementation hints, constraints, dependencies.
+
+# Dependencies
+depends_on: []  # Other story IDs
+blocked_by: []  # External blockers

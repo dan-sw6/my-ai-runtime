@@ -1,0 +1,41 @@
+# MCP Server Requirements by Task Type
+# Defines minimum required MCP servers for different categories of work.
+# Product repos customize the server list to match their .claude/settings.json.
+
+version: "1.0"
+
+task_types:
+  code_exploration:
+    description: "Understanding code structure, finding patterns, tracing flows"
+    required: [serena]
+    optional: [context7, exa]
+
+  implementation:
+    description: "Writing new code, modifying existing code"
+    required: [serena, context7]
+    optional: [postgres_ro, magicui]
+
+  frontend_work:
+    description: "React/TypeScript UI development and review"
+    required: [serena, context7, magicui]
+    optional: [exa]
+
+  database_work:
+    description: "Schema changes, migrations, data queries"
+    required: [serena, postgres_ro]
+    optional: [context7]
+
+  api_review:
+    description: "API contract review, endpoint validation"
+    required: [serena, postgres_ro]
+    optional: [context7]
+
+  requirements_tracing:
+    description: "RTM updates, requirement coverage analysis"
+    required: [serena]
+    optional: [postgres_ro]
+
+  testing:
+    description: "Writing tests, running quality gates"
+    required: [serena]
+    optional: [context7, postgres_ro]
