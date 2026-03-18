@@ -31,18 +31,22 @@ The planner must:
 ## Phase 2: IMPLEMENT
 
 ### Action
-For each task in the plan, launch the appropriate specialist agent.
+For each task in the plan, execute a two-step delegation:
 
-Assign agents by task contour:
-- Backend/API/services → backend specialist
-- Frontend/UI/components → frontend specialist
-- Language-specific complexity → language specialist
+**Step 1 — Prompt Synthesis**: Launch the **prompter** agent with the task details:
+- Phase: IMPLEMENT
+- Task contour (backend/frontend/full-stack/etc.)
+- Task specifics from the plan (files, scope, what to do, tests)
+- Story context and acceptance criteria
+- Controller feedback (if corrective cycle)
 
-Pass to each agent: the specific task, files, tests to write, and commit instructions.
+**Step 2 — Execution**: Launch a **general-purpose** agent with:
+- The **Execution Prompt** from the prompter's synthesis result
+- Commit instructions (`feat:` or `fix:` prefix, module scope)
 
 ### Execution
-- Sequential tasks: one at a time, wait for completion
-- Parallel tasks: launch concurrently using parallel Agent calls
+- Sequential tasks: run Step 1 + Step 2 for each task in sequence
+- Parallel tasks: prompter calls in parallel, then execution calls in parallel
 
 ### Decision Rules
 - **Agent completes task** → proceed to next task or Phase 3
@@ -70,12 +74,16 @@ If any gate fails:
 ## Phase 4: VERIFY
 
 ### Action
-Launch a **verification** agent (adversarial, higher-capability model) to:
-1. Run quality gates independently (do not trust implementer evidence)
-2. Trace each acceptance criterion to actual code
-3. Check for scope creep
-4. Verify tests exist for changed behavior
-5. Issue PASS or FAIL verdict with per-criterion evidence
+Execute a two-step delegation for verification:
+
+**Step 1 — Prompt Synthesis**: Launch the **prompter** agent with:
+- Phase: VERIFY, contour: verification
+- Story ID and story file path
+- Role: adversarial controller — do NOT trust implementer evidence
+
+**Step 2 — Execution**: Launch a **general-purpose** agent (higher-capability model) with:
+- The **Execution Prompt** from the prompter's synthesis result
+- Verification requirements: run gates independently, trace criteria to code, check scope creep, verify tests, issue PASS/FAIL verdict
 
 ### Decision Rules
 - **PASS** → proceed to CLOSE

@@ -58,6 +58,10 @@ entries:
     target: .claude/agents/legacy-modernizer.md
     mode: seed
 
+  - source: claude/agents/_base/prompter.md
+    target: .claude/agents/prompter.md
+    mode: seed
+
   # === Claude Skills (seed) ===
   - source: claude/skills/implement-story/SKILL.md
     target: .claude/skills/implement-story.md
