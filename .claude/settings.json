@@ -1,0 +1,39 @@
+{
+  "permissions": {
+    "defaultMode": "bypassPermissions"
+  }
+  "mcpServers": {
+    "postgres_ro": {
+      "type": "url",
+      "url": "http://127.0.0.1:8933/mcp"
+    },
+    "exa": {
+      "type": "url",
+      "url": "https://mcp.exa.ai/mcp?tools=get_code_context_exa"
+    },
+    "serena": {
+      "command": "uvx",
+      "args": [
+        "--from", "git+https://github.com/oraios/serena",
+        "serena", "start-mcp-server",
+        "--context", "desktop-app",
+        "--project-from-cwd",
+        "--mode", "interactive",
+        "--mode", "query-projects",
+        "--mode", "/home/bogdan/projects/mgt-openproject/.serena/modes/codex-auto.yml"
+      ]
+    },
+    "github": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-github"]
+    },
+    "context7": {
+      "command": "npx",
+      "args": ["-y", "@upstash/context7-mcp@latest"]
+    },
+    "magicui": {
+      "command": "npx",
+      "args": ["-y", "magicui-mcp"]
+    }
+  }
+}
