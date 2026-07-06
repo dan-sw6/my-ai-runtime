@@ -28,16 +28,17 @@ by Spec Kit / other SDD tools can feed it.
 ## Layout
 
 ```
-lib/       runtime-config-read.sh   config reader (env-override, safe defaults)
-           phase-log-util.sh        phase-log append + state-JSON gate (shared lib)
+scripts/   flat bundle — shared libs + harness (~30), all siblings:
+           runtime-config-read.sh   config reader (env-override, safe defaults)
+           phase-log-util.sh        phase-log append + state-JSON gate
            parse-story-frontmatter.sh
-scripts/   worktree/launch/phase/wave/gate/review/merge/monitor harness (~30)
+           worktree/launch/phase/wave/gate/review/merge/monitor scripts
 srs/       OPTIONAL SRS/RTM cluster (gated by srs.enabled) + EARS guide + rtm schema
 ```
 
-Scripts locate their siblings via `$SCRIPT_DIR`, so the bundle is relocatable —
-it syncs into a product at `scripts/ao/` (namespaced, never clobbers the product's
-own `scripts/`).
+Everything under `scripts/` is one flat, relocatable bundle — scripts source their
+siblings via `$SCRIPT_DIR`. It syncs into a product at `scripts/ao/` (namespaced,
+never clobbers the product's own `scripts/`).
 
 ## Configuration
 
