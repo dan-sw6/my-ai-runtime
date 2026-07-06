@@ -80,9 +80,21 @@ for i in "${!ACTIVE_LANGS[@]}"; do
   ACTIVE_LANGS[$i]="$(echo "${ACTIVE_LANGS[$i]}" | tr -d '[:space:]')"
 done
 
+# Opt-in capabilities (e.g. `capabilities: [ao, srs]`) are merged into the active
+# set, so a manifest entry with `profiles: [ao]` syncs only when the product opts
+# into that capability (bootstrap --with-ao) — not for every product.
+active_caps_raw="$(cfg capabilities "")"
+active_caps_raw="${active_caps_raw#[}"; active_caps_raw="${active_caps_raw%]}"
+if [[ -n "${active_caps_raw// /}" ]]; then
+  IFS=',' read -r -a _ACTIVE_CAPS <<< "$active_caps_raw"
+  for c in "${_ACTIVE_CAPS[@]}"; do
+    ACTIVE_LANGS+=("$(echo "$c" | tr -d '[:space:]')")
+  done
+fi
+
 lang_active() {
   local want="$1" l
-  # No languages declared → treat all profile entries as active (permissive default)
+  # No languages/capabilities declared → treat all profile entries as active (permissive default)
   [[ -z "${ACTIVE_LANGS[*]}" ]] && return 0
   for l in "${ACTIVE_LANGS[@]}"; do
     [[ "$l" == "$want" ]] && return 0
