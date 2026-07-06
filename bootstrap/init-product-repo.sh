@@ -18,6 +18,8 @@ PROJECT_NAME=""
 CBM_PROJECT=""
 DO_GLOBAL=false
 DO_SYNC=true
+WITH_AO=false
+WITH_SRS=false
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -26,6 +28,8 @@ while [[ $# -gt 0 ]]; do
     --project-name) PROJECT_NAME="$2"; shift 2 ;;
     --cbm-project)  CBM_PROJECT="$2"; shift 2 ;;
     --install-global) DO_GLOBAL=true; shift ;;
+    --with-ao)      WITH_AO=true; shift ;;
+    --with-srs)     WITH_AO=true; WITH_SRS=true; shift ;;
     --no-sync)      DO_SYNC=false; shift ;;
     -*)             echo "Unknown flag: $1" >&2; exit 1 ;;
     *)              PRODUCT_DIR="$1"; shift ;;
@@ -68,8 +72,18 @@ else
     echo "cbm_project: \"$CBM_PROJECT\""
     echo "cbm_bin: $cbm_bin"
     echo "state_dir: $state_dir"
+    if $WITH_AO; then
+      echo "capabilities: [ao]"
+      echo "# AO story-machinery active — see runtime.config.example.yaml for the ao: block + gate_registry"
+    else
+      echo "capabilities: []"
+    fi
+    if $WITH_SRS; then
+      echo "srs:"
+      echo "  enabled: true"
+    fi
   } > "$CFG"
-  echo "Wrote runtime.config.yaml"
+  echo "Wrote runtime.config.yaml$($WITH_AO && echo ' (AO capability enabled)')"
 fi
 
 # --- sync wrapper -----------------------------------------------------------

@@ -33,6 +33,12 @@ os: linux
 #                discovery via serena(csharp) | CWM.RoslynNavigator
 languages: [python]
 
+# Opt-in capabilities — sync manifest entries tagged `profiles: [<cap>]` only when
+# the capability is listed here (keeps optional bundles out of products that don't
+# use them). bootstrap --with-ao adds `ao`; --with-srs implies ao too.
+#   ao  — the /run-stories closed-loop story-machinery harness (story-machinery/)
+capabilities: []
+
 # --- codebase-memory-mcp (cbm) — optional code-graph discovery backend ---------
 # Leave cbm_project empty ("") to disable cbm entirely (discovery-gate then relaxes
 # for languages that have no other discovery backend configured).

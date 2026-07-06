@@ -67,10 +67,6 @@ entries:
     mode: seed
 
   # === Claude Skills (seed) ===
-  - source: claude/skills/implement-story/SKILL.md
-    target: .claude/skills/implement-story.md
-    mode: seed
-
   - source: claude/skills/verify-story/SKILL.md
     target: .claude/skills/verify-story.md
     mode: seed
@@ -191,6 +187,311 @@ entries:
   - source: shared/templates/srs.md
     target: .claude/templates/srs.md
     mode: template
+
+  # ============================================================
+  # === AO story-machinery (Layer B) — profiles:[ao] (opt-in) ===
+  # ============================================================
+  # Harness scripts → product scripts/ao/ (flat bundle + srs/ subdir).
+  - source: story-machinery/scripts/aggregate-tool-usage.sh
+    target: scripts/ao/aggregate-tool-usage.sh
+    mode: managed
+    profiles: [ao]
+  - source: story-machinery/scripts/analyze-worker-stats.sh
+    target: scripts/ao/analyze-worker-stats.sh
+    mode: managed
+    profiles: [ao]
+  - source: story-machinery/scripts/auto-fixup-from-review.sh
+    target: scripts/ao/auto-fixup-from-review.sh
+    mode: managed
+    profiles: [ao]
+  - source: story-machinery/scripts/branch-ownership-guard.sh
+    target: scripts/ao/branch-ownership-guard.sh
+    mode: managed
+    profiles: [ao]
+  - source: story-machinery/scripts/build-task-context-packet.py
+    target: scripts/ao/build-task-context-packet.py
+    mode: managed
+    profiles: [ao]
+  - source: story-machinery/scripts/cleanup-stale-pids.sh
+    target: scripts/ao/cleanup-stale-pids.sh
+    mode: managed
+    profiles: [ao]
+  - source: story-machinery/scripts/collect-worker-stats.sh
+    target: scripts/ao/collect-worker-stats.sh
+    mode: managed
+    profiles: [ao]
+  - source: story-machinery/scripts/extract_markdown_context_lib.py
+    target: scripts/ao/extract_markdown_context_lib.py
+    mode: managed
+    profiles: [ao]
+  - source: story-machinery/scripts/gate-diff-vs-base.sh
+    target: scripts/ao/gate-diff-vs-base.sh
+    mode: managed
+    profiles: [ao]
+  - source: story-machinery/scripts/git-worktree-hygiene.sh
+    target: scripts/ao/git-worktree-hygiene.sh
+    mode: managed
+    profiles: [ao]
+  - source: story-machinery/scripts/launch-review-worker.sh
+    target: scripts/ao/launch-review-worker.sh
+    mode: managed
+    profiles: [ao]
+  - source: story-machinery/scripts/launch-story-worker-interactive.sh
+    target: scripts/ao/launch-story-worker-interactive.sh
+    mode: managed
+    profiles: [ao]
+  - source: story-machinery/scripts/launch-story-worker.sh
+    target: scripts/ao/launch-story-worker.sh
+    mode: managed
+    profiles: [ao]
+  - source: story-machinery/scripts/migrate-phase-log.sh
+    target: scripts/ao/migrate-phase-log.sh
+    mode: managed
+    profiles: [ao]
+  - source: story-machinery/scripts/parse-story-frontmatter.sh
+    target: scripts/ao/parse-story-frontmatter.sh
+    mode: managed
+    profiles: [ao]
+  - source: story-machinery/scripts/phase-complete.sh
+    target: scripts/ao/phase-complete.sh
+    mode: managed
+    profiles: [ao]
+  - source: story-machinery/scripts/phase-guard-or-exit.sh
+    target: scripts/ao/phase-guard-or-exit.sh
+    mode: managed
+    profiles: [ao]
+  - source: story-machinery/scripts/phase-guard.sh
+    target: scripts/ao/phase-guard.sh
+    mode: managed
+    profiles: [ao]
+  - source: story-machinery/scripts/phase-log-util.sh
+    target: scripts/ao/phase-log-util.sh
+    mode: managed
+    profiles: [ao]
+  - source: story-machinery/scripts/phase-skip.sh
+    target: scripts/ao/phase-skip.sh
+    mode: managed
+    profiles: [ao]
+  - source: story-machinery/scripts/preflight-gate.sh
+    target: scripts/ao/preflight-gate.sh
+    mode: managed
+    profiles: [ao]
+  - source: story-machinery/scripts/prepare-story-worktree.sh
+    target: scripts/ao/prepare-story-worktree.sh
+    mode: managed
+    profiles: [ao]
+  - source: story-machinery/scripts/pr-merge-story.sh
+    target: scripts/ao/pr-merge-story.sh
+    mode: managed
+    profiles: [ao]
+  - source: story-machinery/scripts/render-wave-report.sh
+    target: scripts/ao/render-wave-report.sh
+    mode: managed
+    profiles: [ao]
+  - source: story-machinery/scripts/resolve-story-runtime.sh
+    target: scripts/ao/resolve-story-runtime.sh
+    mode: managed
+    profiles: [ao]
+  - source: story-machinery/scripts/runtime-config-read.sh
+    target: scripts/ao/runtime-config-read.sh
+    mode: managed
+    profiles: [ao]
+  - source: story-machinery/scripts/safe-worktree-cleanup.sh
+    target: scripts/ao/safe-worktree-cleanup.sh
+    mode: managed
+    profiles: [ao]
+  - source: story-machinery/scripts/scope-diff.sh
+    target: scripts/ao/scope-diff.sh
+    mode: managed
+    profiles: [ao]
+  - source: story-machinery/scripts/wait-wave.sh
+    target: scripts/ao/wait-wave.sh
+    mode: managed
+    profiles: [ao]
+  - source: story-machinery/scripts/watch-waiting-workers.sh
+    target: scripts/ao/watch-waiting-workers.sh
+    mode: managed
+    profiles: [ao]
+  - source: story-machinery/scripts/wave-dashboard.sh
+    target: scripts/ao/wave-dashboard.sh
+    mode: managed
+    profiles: [ao]
+  - source: story-machinery/scripts/wave-status.sh
+    target: scripts/ao/wave-status.sh
+    mode: managed
+    profiles: [ao]
+  - source: story-machinery/scripts/worker-liveness.sh
+    target: scripts/ao/worker-liveness.sh
+    mode: managed
+    profiles: [ao]
+  - source: story-machinery/scripts/worker-mark-waiting.sh
+    target: scripts/ao/worker-mark-waiting.sh
+    mode: managed
+    profiles: [ao]
+  - source: story-machinery/scripts/worker-signal-done.sh
+    target: scripts/ao/worker-signal-done.sh
+    mode: managed
+    profiles: [ao]
+  - source: story-machinery/scripts/worker-signal-idle.sh
+    target: scripts/ao/worker-signal-idle.sh
+    mode: managed
+    profiles: [ao]
+  - source: story-machinery/scripts/worker-unmark-waiting.sh
+    target: scripts/ao/worker-unmark-waiting.sh
+    mode: managed
+    profiles: [ao]
+  - source: story-machinery/scripts/worktree-gate.sh
+    target: scripts/ao/worktree-gate.sh
+    mode: managed
+    profiles: [ao]
+  - source: story-machinery/scripts/write-review-json.sh
+    target: scripts/ao/write-review-json.sh
+    mode: managed
+    profiles: [ao]
+  - source: story-machinery/scripts/srs/apply-srs-pending.sh
+    target: scripts/ao/srs/apply-srs-pending.sh
+    mode: managed
+    profiles: [ao]
+  - source: story-machinery/scripts/srs/archive-implemented-srs.py
+    target: scripts/ao/srs/archive-implemented-srs.py
+    mode: managed
+    profiles: [ao]
+  - source: story-machinery/scripts/srs/merge-with-rtm-strategy.sh
+    target: scripts/ao/srs/merge-with-rtm-strategy.sh
+    mode: managed
+    profiles: [ao]
+  - source: story-machinery/scripts/srs/README.md
+    target: scripts/ao/srs/README.md
+    mode: managed
+    profiles: [ao]
+  - source: story-machinery/scripts/srs/rebuild-rtm.py
+    target: scripts/ao/srs/rebuild-rtm.py
+    mode: managed
+    profiles: [ao]
+  - source: story-machinery/scripts/srs/rebuild-rtm.sh
+    target: scripts/ao/srs/rebuild-rtm.sh
+    mode: managed
+    profiles: [ao]
+  - source: story-machinery/scripts/srs/rtm-srs-sync.sh
+    target: scripts/ao/srs/rtm-srs-sync.sh
+    mode: managed
+    profiles: [ao]
+  - source: story-machinery/scripts/srs/srs-counts.py
+    target: scripts/ao/srs/srs-counts.py
+    mode: managed
+    profiles: [ao]
+  # Story agents → .claude/agents/ (seed)
+  - source: claude/agents/_base/story-executor.md
+    target: .claude/agents/story-executor.md
+    mode: seed
+    profiles: [ao]
+  - source: claude/agents/_base/story-planner.md
+    target: .claude/agents/story-planner.md
+    mode: seed
+    profiles: [ao]
+  - source: claude/agents/_base/story-auditor.md
+    target: .claude/agents/story-auditor.md
+    mode: seed
+    profiles: [ao]
+  - source: claude/agents/_base/solo-reviewer.md
+    target: .claude/agents/solo-reviewer.md
+    mode: seed
+    profiles: [ao]
+  # Phase-contract rule + schemas (managed)
+  - source: claude/rules/phase-contract.md
+    target: .claude/rules/phase-contract.md
+    mode: managed
+    profiles: [ao]
+  - source: claude/references/phase-contract-schemas.md
+    target: .claude/references/phase-contract-schemas.md
+    mode: managed
+    profiles: [ao]
+  # rtm schema template
+  - source: shared/templates/rtm.schema.yaml
+    target: .claude/templates/rtm.schema.yaml
+    mode: template
+    profiles: [ao]
+  # Skills implement-story + run-stories (seed, dir-form with references)
+  - source: claude/skills/implement-story/references/agent-view-engine.md
+    target: .claude/skills/implement-story/references/agent-view-engine.md
+    mode: seed
+    profiles: [ao]
+  - source: claude/skills/implement-story/references/design-modes.md
+    target: .claude/skills/implement-story/references/design-modes.md
+    mode: seed
+    profiles: [ao]
+  - source: claude/skills/implement-story/references/effort-by-phase.md
+    target: .claude/skills/implement-story/references/effort-by-phase.md
+    mode: seed
+    profiles: [ao]
+  - source: claude/skills/implement-story/references/interactive-checkpoints.md
+    target: .claude/skills/implement-story/references/interactive-checkpoints.md
+    mode: seed
+    profiles: [ao]
+  - source: claude/skills/implement-story/references/invariants.md
+    target: .claude/skills/implement-story/references/invariants.md
+    mode: seed
+    profiles: [ao]
+  - source: claude/skills/implement-story/references/logging-protocol.md
+    target: .claude/skills/implement-story/references/logging-protocol.md
+    mode: seed
+    profiles: [ao]
+  - source: claude/skills/implement-story/references/mcp-cheatsheet.md
+    target: .claude/skills/implement-story/references/mcp-cheatsheet.md
+    mode: seed
+    profiles: [ao]
+  - source: claude/skills/implement-story/references/parallel-execution.md
+    target: .claude/skills/implement-story/references/parallel-execution.md
+    mode: seed
+    profiles: [ao]
+  - source: claude/skills/implement-story/references/phase-0-init.md
+    target: .claude/skills/implement-story/references/phase-0-init.md
+    mode: seed
+    profiles: [ao]
+  - source: claude/skills/implement-story/references/phase-1-plan.md
+    target: .claude/skills/implement-story/references/phase-1-plan.md
+    mode: seed
+    profiles: [ao]
+  - source: claude/skills/implement-story/references/phase-2-implement.md
+    target: .claude/skills/implement-story/references/phase-2-implement.md
+    mode: seed
+    profiles: [ao]
+  - source: claude/skills/implement-story/references/phase-3-gate.md
+    target: .claude/skills/implement-story/references/phase-3-gate.md
+    mode: seed
+    profiles: [ao]
+  - source: claude/skills/implement-story/references/phase-4-verify.md
+    target: .claude/skills/implement-story/references/phase-4-verify.md
+    mode: seed
+    profiles: [ao]
+  - source: claude/skills/implement-story/references/phase-5-close.md
+    target: .claude/skills/implement-story/references/phase-5-close.md
+    mode: seed
+    profiles: [ao]
+  - source: claude/skills/implement-story/references/srs-sync.md
+    target: .claude/skills/implement-story/references/srs-sync.md
+    mode: seed
+    profiles: [ao]
+  - source: claude/skills/implement-story/SKILL.md
+    target: .claude/skills/implement-story/SKILL.md
+    mode: seed
+    profiles: [ao]
+  - source: claude/skills/run-stories/references/changelog-followups.md
+    target: .claude/skills/run-stories/references/changelog-followups.md
+    mode: seed
+    profiles: [ao]
+  - source: claude/skills/run-stories/references/post-merge-review.md
+    target: .claude/skills/run-stories/references/post-merge-review.md
+    mode: seed
+    profiles: [ao]
+  - source: claude/skills/run-stories/references/srs-status-sync.md
+    target: .claude/skills/run-stories/references/srs-status-sync.md
+    mode: seed
+    profiles: [ao]
+  - source: claude/skills/run-stories/SKILL.md
+    target: .claude/skills/run-stories/SKILL.md
+    mode: seed
+    profiles: [ao]
 
 # Files NEVER synced (product-only, listed for documentation)
 exclusions:
