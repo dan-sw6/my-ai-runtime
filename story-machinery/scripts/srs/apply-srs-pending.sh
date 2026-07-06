@@ -27,7 +27,7 @@
 set -uo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-source "$SCRIPT_DIR/../scripts/runtime-config-read.sh"
+source "$SCRIPT_DIR/../runtime-config-read.sh"
 rcfg_bool srs.enabled || { echo '{"skipped":"srs-disabled","applied":false}'; exit 0; }
 
 STORY_ID="${1:?Usage: $0 STORY-ID [--apply]}"

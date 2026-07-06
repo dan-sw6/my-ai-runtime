@@ -133,7 +133,7 @@ if [[ "${WT_MERGE_BASE}" != "${ORIG_BASE_TIP}" ]]; then
           git add -- "$f"
         done <<< "${CONFLICTED}"
         if echo "${CONFLICTED}" | grep -qF "${RTM_PATH}"; then
-          [[ -x "$SCRIPT_DIR/../srs/rebuild-rtm.sh" ]] && ( cd "${REPO_ROOT}" && bash "$SCRIPT_DIR/../srs/rebuild-rtm.sh" >/dev/null 2>&1 ) || true
+          [[ -x "$SCRIPT_DIR/srs/rebuild-rtm.sh" ]] && ( cd "${REPO_ROOT}" && bash "$SCRIPT_DIR/srs/rebuild-rtm.sh" >/dev/null 2>&1 ) || true
           git add -- "${RTM_PATH}" 2>/dev/null || true
         fi
         git commit --no-edit >/tmp/wtg-merge.log 2>&1 || fail "auto-rebase-conflict" "docs-resolve commit failed"

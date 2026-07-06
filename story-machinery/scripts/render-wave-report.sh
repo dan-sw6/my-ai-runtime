@@ -122,9 +122,9 @@ except Exception:
   echo "\`\`\`bash"
   echo "git log --oneline ${MAIN_REF}..${HEAD_SHA}"
   if rcfg_bool srs.enabled; then
-    echo "bash scripts/rebuild-rtm.sh"
+    echo "bash scripts/ao/srs/rebuild-rtm.sh"
   fi
-  echo "bash scripts/lint.sh && bash scripts/test.sh && bash scripts/type.sh"
+  echo "# then run this project's configured gate commands (see runtime.config.yaml gates/ao.gate_registry)"
   echo "\`\`\`"
   echo
   echo "---"

@@ -32,7 +32,7 @@
 set -uo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-source "$SCRIPT_DIR/../scripts/runtime-config-read.sh"
+source "$SCRIPT_DIR/../runtime-config-read.sh"
 
 STORY_BRANCH="${1:?Usage: $0 STORY-BRANCH [-- extra git-merge args]}"
 shift || true

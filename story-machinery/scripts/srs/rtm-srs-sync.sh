@@ -29,7 +29,7 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-source "$SCRIPT_DIR/../scripts/runtime-config-read.sh"
+source "$SCRIPT_DIR/../runtime-config-read.sh"
 rcfg_bool srs.enabled || { echo '{"error":"srs-disabled","items":[],"drift_count":0}'; exit 0; }
 
 REPO_ROOT="$(git rev-parse --show-toplevel 2>/dev/null)" || { echo '{"error":"not-a-git-repo"}'; exit 1; }
