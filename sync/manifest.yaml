@@ -13,18 +13,22 @@ entries:
   - source: claude/agents/_base/frontend-developer.md
     target: .claude/agents/frontend-developer.md
     mode: seed
+    profiles: [typescript]
 
   - source: claude/agents/_base/ui-designer.md
     target: .claude/agents/ui-designer.md
     mode: seed
+    profiles: [typescript]
 
   - source: claude/agents/_base/typescript-pro.md
     target: .claude/agents/typescript-pro.md
     mode: seed
+    profiles: [typescript]
 
   - source: claude/agents/_base/react-specialist.md
     target: .claude/agents/react-specialist.md
     mode: seed
+    profiles: [typescript]
 
   - source: claude/agents/_base/backend-developer.md
     target: .claude/agents/backend-developer.md
@@ -78,6 +82,7 @@ entries:
   - source: claude/skills/audit-frontend/SKILL.md
     target: .claude/skills/audit-frontend.md
     mode: seed
+    profiles: [typescript]
 
   # === Quality Gates (managed — runtime owns these) ===
   - source: shared/quality-gates/definition-of-done.yaml
@@ -104,6 +109,71 @@ entries:
   - source: claude/rules/secret-handling.md
     target: .claude/rules/secret-handling.md
     mode: managed
+
+  # === Discipline rules — Layer A (managed, tokenized) ===
+  - source: claude/rules/mcp-usage.md
+    target: .claude/rules/mcp-usage.md
+    mode: managed
+    substitute: true
+
+  - source: claude/rules/reusability.md
+    target: .claude/rules/reusability.md
+    mode: managed
+    substitute: true
+
+  - source: claude/rules/quality-gates.md
+    target: .claude/rules/quality-gates.md
+    mode: managed
+    substitute: true
+
+  # === References — Layer A (managed, tokenized) ===
+  - source: claude/references/mcp-tool-inventory.md
+    target: .claude/references/mcp-tool-inventory.md
+    mode: managed
+    substitute: true
+
+  - source: claude/references/mcp-tool-matrix.md
+    target: .claude/references/mcp-tool-matrix.md
+    mode: managed
+    substitute: true
+
+  - source: claude/references/external-docs/serena-setup.md
+    target: .claude/references/external-docs/serena-setup.md
+    mode: managed
+
+  - source: claude/references/external-docs/claude-mem-tuning.md
+    target: .claude/references/external-docs/claude-mem-tuning.md
+    mode: managed
+
+  # === Discipline skills — Layer A (seed, tokenized) ===
+  - source: claude/skills/mcp-discipline/SKILL.md
+    target: .claude/skills/mcp-discipline/SKILL.md
+    mode: seed
+    substitute: true
+
+  - source: claude/skills/mcp-discipline/references/anti-patterns.md
+    target: .claude/skills/mcp-discipline/references/anti-patterns.md
+    mode: seed
+    substitute: true
+
+  - source: claude/skills/mcp-discipline/references/recipes.md
+    target: .claude/skills/mcp-discipline/references/recipes.md
+    mode: seed
+    substitute: true
+
+  - source: claude/skills/db-explain/SKILL.md
+    target: .claude/skills/db-explain/SKILL.md
+    mode: seed
+
+  - source: claude/skills/review-pr/SKILL.md
+    target: .claude/skills/review-pr/SKILL.md
+    mode: seed
+
+  # === Per-repo MCP template (root .mcp.json — create if missing) ===
+  - source: mcp/mcp.product.template.json
+    target: .mcp.json
+    mode: template
+    substitute: true
 
   # === Templates (template — create if missing, warn if stale) ===
   - source: shared/templates/story.yaml
