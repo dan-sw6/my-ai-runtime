@@ -1,0 +1,49 @@
+# csharp profile fragment — ADOPT model
+#
+# Merge these keys into the product's runtime.config.yaml (see
+# config/runtime.config.example.yaml for the full per-product shape). This fragment
+# does not stand alone — it only makes sense layered onto an existing config.
+#
+# Read profiles/csharp/adopt.md before using this: it explains why WPF requires
+# native Windows (never WSL) and what "discovery: serena" / "discovery: roslyn-navigator"
+# actually installs.
+#
+# ---------------------------------------------------------------------------
+
+# Add csharp alongside whatever languages the product already has, e.g. [python, csharp]
+# or [typescript, csharp] for a mixed backend+desktop-client repo.
+languages: [csharp]
+
+# WPF builds and runs only on native Windows. Run Claude Code on native Windows with
+# Git for Windows installed (provides the Bash shell Claude Code uses for hooks).
+# Do NOT run this profile under WSL — anthropics/claude-code#26006: the agent installs
+# dotnet inside the WSL guest and cannot build Windows-only MSBuild/.NET Framework
+# targets. Native Windows is first-class supported: `irm https://claude.ai/install.ps1 | iex`.
+os: windows
+
+# File extensions the discovery-gate should treat as "code" for this language.
+extensions: [.cs, .xaml, .axaml, .csproj, .sln, .props, .targets]
+
+# Which MCP the discovery-gate requires before Read/Edit on the extensions above.
+# This is NOT cbm — cbm has no C# support. Two options, pick one per product:
+#   serena             — primary recommendation; C# via Roslyn LS (or OmniSharp for
+#                         .NET Framework 4.8, see adopt.md). Installed via uv, NOT as
+#                         a Claude Code plugin.
+#   roslyn-navigator    — CWM.RoslynNavigator (dotnet-claude-kit's Roslyn MCP); 15
+#                         semantic tools (find_symbol/find_references/find_callers/
+#                         find_implementations/get_diagnostics/get_type_hierarchy/...).
+#                         Use as an addition to serena, or as the sole discovery
+#                         backend if a product adopts dotnet-claude-kit standalone.
+discovery: serena
+
+# serena project.yml language key. csharp = Roslyn LS (default, fast, needs .NET 10
+# runtime present — does not affect the project's own target framework).
+# csharp_omnisharp = OmniSharp, experimental, better fit for .NET Framework 4.8 WPF apps.
+lsp: csharp
+
+# Per-language gate commands (dotnet CLI; assumes .NET SDK 10.0.300+ on PATH).
+gates:
+  csharp:
+    build: "dotnet build"
+    test: "dotnet test"
+    format: "dotnet format --verify-no-changes"
