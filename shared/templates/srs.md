@@ -28,7 +28,8 @@
 
 ### 1.5 Document Conventions
 
-Requirement ID prefixes:
+Requirement ID prefixes (configurable — see `srs.req_id_prefixes` in `runtime.config.yaml`
+if this project uses the optional SRS/RTM automation in `story-machinery/srs/`):
 - `FR-<MODULE>-NNN` — Functional requirements
 - `NFR-<CATEGORY>-NNN` — Non-functional requirements
 - `SEC-<CATEGORY>-NNN` — Security requirements
@@ -38,6 +39,39 @@ Priority levels (MoSCoW):
 - **Should Have** — important, workaround exists
 - **Could Have** — desirable if time permits
 - **Won't Have** — explicitly out of scope this version
+
+Status vocabulary (canonical — drives the optional SRS/RTM automation):
+- `not_started` — no implementation yet
+- `partial` — in progress / partially delivered
+- `implemented` — done and verified; `archive-implemented-srs.py` auto-moves the block
+  out of the active SRS into the implemented-archive doc (`srs.archive_path`)
+- `deprecated` — requirement withdrawn, kept for history
+
+#### Acceptance criteria notation — EARS
+
+Acceptance criteria are authored in **EARS** (Easy Approach to Requirements Syntax) —
+unambiguous, testable sentences that translate directly into test cases. Pick the
+pattern that matches the requirement's shape; combine clauses for compound cases
+(`WHEN <trigger> WHILE <state> the system SHALL <response>.`):
+
+| Pattern | Form | Use for |
+|---------|------|---------|
+| Ubiquitous | The system SHALL \<response\>. | Always-true invariants |
+| Event-driven | WHEN \<trigger\> the system SHALL \<response\>. | Behavior triggered by an event |
+| State-driven | WHILE \<state\> the system SHALL \<response\>. | Behavior throughout a state |
+| Conditional | IF \<condition\> THEN the system SHALL \<response\>. | Branching / conditional behavior |
+| Unwanted behavior | IF \<condition\> THEN the system SHALL \<response\>. | Error/exception handling paths |
+| Optional feature | WHERE \<feature is included\> the system SHALL \<response\>. | Feature-flagged behavior |
+
+> **Automation-reserved markers** (only relevant if `srs.enabled` — see `story-machinery/srs/README.md`):
+> `srs-counts.py --write` injects its summary tables between `<!-- srs-counts:start -->` /
+> `<!-- srs-counts:end -->` markers — pre-seed an empty pair under whichever section tracks
+> implementation-status counts. Without pre-seeded markers it falls back to inserting under
+> the first heading matching `## 7`, so keep that section at position 7 if you skip this step.
+> `archive-implemented-srs.py` similarly expects a `### Not Started (priority work)` table
+> (rows pruned automatically as requirements are archived) and a
+> `> **Delivered requirements:** ...` pointer line per category section — both optional,
+> add them only if you want that sync.
 
 ## 2. Overall Description
 
@@ -91,12 +125,17 @@ Priority levels (MoSCoW):
 
 | Field | Value |
 |-------|-------|
+| **Status** | not_started |
 | **Priority** | Must Have |
 | **Description** | The system shall... |
 | **Rationale** | Why this requirement exists |
-| **Acceptance Criteria** | Given... When... Then... |
+| **Acceptance Criteria** | WHEN \<trigger\> the system SHALL \<response\>. IF \<condition\> THEN the system SHALL \<response\>. |
 | **Dependencies** | FR-*, NFR-*, SEC-* |
 | **Notes** | Edge cases, constraints |
+
+<!-- **Status** must stay first data row — archive-implemented-srs.py / apply-srs-pending.sh
+     insert `| **Verified At** | <date> |` + `| **Story** | STORY-NNN |` right after it once
+     Status flips to `implemented`, then move the whole block to the archive doc. -->
 
 <!-- Repeat for each requirement in this module. -->
 

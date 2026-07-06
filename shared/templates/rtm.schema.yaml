@@ -1,0 +1,98 @@
+# rtm.schema.yaml — descriptor of the rtm.yaml shape, aligned to the published
+# TestAny-io/rtm-yaml-schema (github.com/testany-io/rtm-yaml-schema, JSON Schema
+# Draft-07) for cross-tool interop.
+#
+# Status: DOCUMENTATION, not a JSON-Schema file consumed by any script in
+# story-machinery/srs/. rebuild-rtm.py emits a narrower NATIVE shape (see "Native vs
+# interop shape" below) — this descriptor exists so (a) authors know the target shape
+# if they hand-author or import an rtm.yaml from another SDD tool, and (b) a future
+# adapter can map one shape to the other without re-deriving the field list from
+# scratch. Keep it in sync if rebuild-rtm.py's emit_yaml() changes.
+#
+# ---------------------------------------------------------------------------
+# Top-level sections (from the published schema — this harness only populates
+# `info` + `requirement`; the rest are accepted-but-unused placeholders so a
+# hand-authored or imported rtm.yaml validates against the upstream schema too).
+# ---------------------------------------------------------------------------
+
+info:
+  # type: object — metadata about the RTM document itself.
+  version: string          # e.g. "1.0.0"
+  title: string             # e.g. "<Project Name> RTM"
+  description: string
+  contact:
+    name: string
+    email: string
+  created: string           # ISO date
+  updated: string           # ISO date
+  status: string            # e.g. "Draft" | "Active"
+
+requirement:
+  # type: array<object> — one entry per requirement ID.
+  # Required fields (5): id, summary, description, type, priority.
+  # Optional: srs_info (nested — acceptance_criteria is the field this harness cares
+  # about most; category_and_complexity / business_objectives / metrics are accepted
+  # but not populated by rebuild-rtm.py).
+  - id: string              # pattern: "<PREFIX>-<CATEGORY>-<NNN>", e.g. "FR-USER-001"
+                             # PREFIX taxonomy is project-configurable — srs.req_id_prefixes
+                             # in runtime.config.yaml (default [FR, NFR, SEC]).
+    summary: string          # short title
+    description: string      # full requirement text ("The system SHALL ...")
+    type: enum               # "Functional" | "Non-Functional"
+    priority: enum            # "High" | "Medium" | "Low"
+                              # (this harness's native priority vocabulary is MoSCoW —
+                              #  must_have/should_have/could_have/wont_have; see mapping below)
+    srs_info:
+      business_objectives: string   # optional
+      metrics: string                # optional — mainly for NFRs (e.g. "P95 < 2s")
+      category_and_complexity:
+        category: string
+        complexity: string           # e.g. "Small" | "Medium" | "Large"
+      acceptance_criteria:            # array<string> — EARS-notated sentences
+        - "WHEN <trigger> the system SHALL <response>."
+        - "IF <condition> THEN the system SHALL <response>."
+
+# Sibling top-level arrays from the published schema — placeholders, not populated
+# by this harness. Kept here so a document combining both shapes still validates.
+adr: []
+assumption: []
+issue: []
+component: []
+testcase: []
+risk: []
+change_request: []
+
+# ---------------------------------------------------------------------------
+# Native vs interop shape
+# ---------------------------------------------------------------------------
+# rebuild-rtm.py (story-machinery/srs/) emits a narrower, flatter shape optimised
+# for its one job — requirement → {stories, files, tests} linkage, with status
+# living exclusively in the SRS (never duplicated into rtm.yaml):
+#
+#   schema_version: "9.0"
+#   generated: "<date>"
+#   source: "AUTO-GENERATED from ..."
+#   requirements:               # dict keyed by req ID, NOT an array
+#     FR-USER-001:
+#       title: "..."             # ~= summary above (no separate `description`)
+#       priority: must_have      # MoSCoW, not High/Medium/Low
+#       stories: [STORY-041, STORY-057]
+#       files: ["path/a.py", "path/b.tsx"]
+#       tests: ["tests/test_a.py::test_x"]
+#       verified_at: "2026-06-01"
+#       notes: "..."
+#
+# Field mapping (native → interop):
+#   requirements.<ID>.title      → requirement[].summary
+#   requirements.<ID>.priority   → requirement[].priority, via MoSCoW→High/Medium/Low
+#                                   (must_have/should_have → High; could_have → Medium;
+#                                    wont_have → Low — lossy, no exact inverse)
+#   requirements.<ID>.stories    → not modeled upstream (this harness's own linkage)
+#   requirements.<ID>.files      → not modeled upstream (this harness's own linkage)
+#   requirements.<ID>.tests      → not modeled upstream (this harness's own linkage)
+#   SRS `#### <ID>:` block's Acceptance Criteria row → requirement[].srs_info.acceptance_criteria
+#     (EARS-notated per shared/templates/srs.md §1.5 — split on sentence boundary)
+#
+# No adapter script exists yet in story-machinery/srs/ — this file is the reference
+# for writing one, and for hand-mapping when importing a rtm.yaml authored by another
+# spec-driven-development tool.
