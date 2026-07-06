@@ -1,0 +1,38 @@
+#!/usr/bin/env bash
+# PostToolUse(all) — log every tool call to per-session JSONL for usage analytics.
+# Writes to $CLAUDE_STATE_DIR/tool-usage/{SESSION_ID}.jsonl. Pure bash+jq (no python).
+set -euo pipefail
+
+INPUT=$(cat)
+TOOL_NAME=$(echo "$INPUT" | jq -r '.tool_name // ""')
+case "$TOOL_NAME" in ""|-) exit 0 ;; esac
+
+SESSION_ID=$(echo "$INPUT" | jq -r '.session_id // "unknown"')
+TIMESTAMP=$(date -Iseconds 2>/dev/null || date +%Y-%m-%dT%H:%M:%S%z)
+
+TOOL_TYPE="builtin"
+SKILL_NAME=""
+MCP_SERVER=""
+MCP_TOOL=""
+
+if [[ "$TOOL_NAME" == mcp__* ]]; then
+  TOOL_TYPE="mcp"
+  # mcp__<server>__<tool>. Server has no `__`; tool may contain single `_`.
+  rest="${TOOL_NAME#mcp__}"
+  MCP_SERVER="${rest%%__*}"
+  MCP_TOOL="${rest#*__}"
+  [[ "$MCP_TOOL" == "$rest" ]] && MCP_TOOL=""
+elif [[ "$TOOL_NAME" == "Skill" ]]; then
+  TOOL_TYPE="skill"
+  SKILL_NAME=$(echo "$INPUT" | jq -r '.tool_input.skill // ""')
+fi
+
+STATE_DIR="${CLAUDE_STATE_DIR:-${TMPDIR:-${TEMP:-/tmp}}/claude-workers}"
+LOG_DIR="${STATE_DIR}/tool-usage"
+mkdir -p "$LOG_DIR"
+LOG_FILE="${LOG_DIR}/${SESSION_ID}.jsonl"
+
+printf '{"ts":"%s","tool":"%s","type":"%s","mcp_server":"%s","mcp_tool":"%s","skill":"%s"}\n' \
+  "$TIMESTAMP" "$TOOL_NAME" "$TOOL_TYPE" "$MCP_SERVER" "$MCP_TOOL" "$SKILL_NAME" \
+  >> "$LOG_FILE"
+exit 0

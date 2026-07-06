@@ -1,0 +1,104 @@
+#!/usr/bin/env bash
+# PreToolUse:Bash — code-discovery gate (profile-aware, cross-stack).
+#
+# Blocks blind recursive grep/rg/find on CODE files and steers to the active
+# profile's code-discovery MCP. Generalized from the cbm-only original: the set
+# of guarded extensions and the tool named in the deny message come from the
+# product's runtime.config.yaml `languages:` (falls back to python+typescript).
+#
+#   Python/TS/Go/... → codebase-memory-mcp (cbm) when cbm_project is set, else serena
+#   C#               → serena(csharp) or a Roslyn MCP (e.g. CWM.RoslynNavigator)
+#
+# Never blocks: git, non-recursive grep on a single file, grep on non-code files
+# (.md/.yaml/.json/…), and migration/versions dirs. Uses JSON permissionDecision
+# =deny (exit 2 is unreliable — Claude Code bugs #43407/#26923).
+#
+# Deps: bash, jq, grep -P (GNU grep — ships with Git for Windows). No python needed.
+# Bypass: CLAUDE_BYPASS_DISCOVERY_GATE=1 (legacy alias: CLAUDE_BYPASS_CBM_GATE=1),
+#         set in the Claude Code MAIN process env — inline `VAR=1 grep …` does NOT work.
+
+if [[ "${CLAUDE_BYPASS_DISCOVERY_GATE:-${CLAUDE_BYPASS_CBM_GATE:-0}}" == "1" ]]; then exit 0; fi
+
+INPUT=$(cat)
+COMMAND=$(echo "$INPUT" | jq -r '.tool_input.command // ""' 2>/dev/null)
+[[ -z "$COMMAND" ]] && exit 0
+
+# Allow git commands
+[[ "$COMMAND" =~ ^[[:space:]]*git[[:space:]] ]] && exit 0
+
+# --- Read active profiles from product config -------------------------------
+CONFIG="${CLAUDE_PROJECT_DIR:-$PWD}/runtime.config.yaml"
+LANGS="python typescript"          # default when no config (matches original behaviour)
+CBM_PROJECT=""
+if [[ -f "$CONFIG" ]]; then
+  raw=$(grep -E '^languages:' "$CONFIG" 2>/dev/null | head -1 \
+    | sed -E 's/^languages:[[:space:]]*//; s/#.*//; s/[][]//g; s/,/ /g')
+  [[ -n "${raw// }" ]] && LANGS="$raw"
+  CBM_PROJECT=$(grep -E '^cbm_project:' "$CONFIG" 2>/dev/null | head -1 \
+    | sed -E 's/^cbm_project:[[:space:]]*//; s/#.*//; s/[[:space:]]//g; s/["'"'"']//g')
+fi
+
+# --- Build guarded-extension set from active languages ----------------------
+EXTS=""
+for l in $LANGS; do
+  case "$l" in
+    python)     EXTS="$EXTS py pyi" ;;
+    typescript) EXTS="$EXTS ts tsx js jsx mts cts mjs cjs" ;;
+    go)         EXTS="$EXTS go" ;;
+    csharp)     EXTS="$EXTS cs xaml axaml" ;;
+    rust)       EXTS="$EXTS rs" ;;
+    java)       EXTS="$EXTS java" ;;
+    kotlin)     EXTS="$EXTS kt kts" ;;
+    cpp)        EXTS="$EXTS cpp cc cxx hpp hh" ;;
+    ruby)       EXTS="$EXTS rb" ;;
+  esac
+done
+EXTS="$(echo "$EXTS" | tr -s ' ' | sed -E 's/^ //; s/ $//')"
+[[ -z "$EXTS" ]] && exit 0                     # no guarded languages → gate off
+EXT_RE="$(echo "$EXTS" | tr ' ' '|')"          # e.g. py|pyi|ts|tsx|...
+
+# --- Allow-list: non-code files, single-file grep, migrations ----------------
+if echo "$COMMAND" | grep -qP 'grep.*\.(md|markdown|yaml|yml|json|jsonc|csv|sh|bash|txt|env|css|scss|toml|lock|xml|ini|cfg|conf)\b'; then exit 0; fi
+# Non-recursive grep without --include on code types
+if echo "$COMMAND" | grep -qP 'grep\s+(?!-[a-zA-Z]*r)' && ! echo "$COMMAND" | grep -qP 'grep.*--include'; then exit 0; fi
+# Migration / versions dirs — raw SQL/script chains that graph tools don't index
+if echo "$COMMAND" | grep -qP '(migrations/versions|alembic/versions|/Migrations/)'; then exit 0; fi
+
+# --- Tool hint for the deny message -----------------------------------------
+if [[ -n "$CBM_PROJECT" ]]; then
+  CODE_TOOL='mcp__codebase-memory-mcp__search_code(pattern, mode="compact") / search_graph(name_pattern, label)'
+else
+  CODE_TOOL='serena search_for_pattern / find_symbol (mcp__serena__*)'
+fi
+CS_HINT=""
+if echo " $LANGS " | grep -q ' csharp '; then
+  CS_HINT=' · C#(.cs/.xaml): serena(csharp) find_symbol/find_referencing_symbols, или Roslyn MCP (CWM.RoslynNavigator: find_symbol/find_references/get_diagnostics)'
+fi
+BYPASS_NOTE='Разрешено: non-recursive grep по одному файлу, grep по .md/.yaml/.json/... . Bypass: CLAUDE_BYPASS_DISCOVERY_GATE=1 в env ГЛАВНОГО процесса Claude Code (inline `VAR=1 grep …` НЕ работает).'
+
+emit_deny() {
+  local reason="$1"
+  echo "$reason" >&2
+  jq -n --arg r "$reason" '{hookSpecificOutput:{hookEventName:"PreToolUse",permissionDecision:"deny",permissionDecisionReason:$r}}'
+  exit 0
+}
+
+# --- Blocks -----------------------------------------------------------------
+# Recursive grep on code
+if echo "$COMMAND" | grep -qP 'grep\s+-[a-zA-Z]*r[a-zA-Z]*\s'; then
+  emit_deny "BLOCKED: recursive grep на code-файлах. USE: ${CODE_TOOL}.${CS_HINT} ${BYPASS_NOTE}"
+fi
+# grep --include targeting a guarded code type
+if echo "$COMMAND" | grep -qP "grep\s+--include[= ]?['\"]?\*?\.($EXT_RE)\b"; then
+  emit_deny "BLOCKED: grep --include для code-файлов. USE: ${CODE_TOOL}.${CS_HINT} ${BYPASS_NOTE}"
+fi
+# ripgrep (recursive by default)
+if echo "$COMMAND" | grep -qP '\brg\s+'; then
+  emit_deny "BLOCKED: rg (ripgrep) для code-discovery. USE: ${CODE_TOOL}.${CS_HINT} ${BYPASS_NOTE}"
+fi
+# find -name '*.<guarded-ext>'
+if echo "$COMMAND" | grep -qP "find\s.*-name\s+['\"]?\*?\.($EXT_RE)\b"; then
+  emit_deny "BLOCKED: find -name '*.<code>'. USE: search_graph(name_pattern, label=\"File\"|\"Function\") или query_graph.${CS_HINT} ${BYPASS_NOTE}"
+fi
+
+exit 0

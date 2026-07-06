@@ -1,0 +1,31 @@
+#!/usr/bin/env bash
+# PreToolUse:WebFetch|WebSearch — soft hint to prefer context7/exa for library docs.
+# Never blocks (permissionDecision=allow + reason). No python dependency.
+set -uo pipefail
+
+INPUT=$(cat)
+if [[ "${CLAUDE_BYPASS_MCP_SOFT:-0}" == "1" ]]; then exit 0; fi
+
+URL=$(echo "$INPUT" | jq -r '.tool_input.url // ""' 2>/dev/null)
+QUERY=$(echo "$INPUT" | jq -r '.tool_input.query // .tool_input.prompt // ""' 2>/dev/null)
+SESSION_ID=$(echo "$INPUT" | jq -r '.session_id // ""' 2>/dev/null)
+HAYSTACK=$(printf '%s %s' "$URL" "$QUERY" | tr '[:upper:]' '[:lower:]')
+
+# Popular libs/frameworks across stacks (JS/TS, Python, .NET) where docs drift fast.
+LIB_REGEX='\b(react|fastapi|prisma|tanstack|sqlalchemy|alembic|vitest|playwright|tailwind|next\.js|nextjs|django|express|svelte|vue|nuxt|pydantic|fastify|axios|zod|trpc|drizzle|shadcn|radix|nestjs|astro|remix|jest|cypress|storybook|mui|chakra|antd|mongoose|sequelize|typeorm|bun|deno|vite|webpack|esbuild|rollup|biome|eslint|prettier|numpy|pandas|pytorch|tensorflow|scikit-learn|transformers|wpf|avalonia|maui|blazor|entityframework|efcore|aspnetcore|xunit|nunit|polly|mediatr|fluentvalidation|automapper|serilog)\b'
+
+if ! echo "$HAYSTACK" | grep -qE "$LIB_REGEX"; then exit 0; fi
+
+# Skip the hint if context7/exa was already used recently in this session.
+STATE_DIR="${CLAUDE_STATE_DIR:-${TMPDIR:-${TEMP:-/tmp}}/claude-workers}"
+LOG_FILE="${STATE_DIR}/tool-usage/${SESSION_ID}.jsonl"
+if [[ -n "$SESSION_ID" && -f "$LOG_FILE" ]]; then
+  if tail -n 10 "$LOG_FILE" 2>/dev/null | grep -qiE 'context7|exa'; then
+    exit 0
+  fi
+fi
+
+REASON='HINT (soft): для library docs предпочти context7 (resolve-library-id → query-docs) — актуальная версия под твой стек. Для open research — exa (web_search_exa → web_fetch_exa). WebFetch/WebSearch допустимы как fallback. См. .claude/references/mcp-tool-inventory.md.'
+echo "$REASON" >&2
+jq -n --arg r "$REASON" '{hookSpecificOutput:{hookEventName:"PreToolUse",permissionDecision:"allow",permissionDecisionReason:$r},systemMessage:"MCP soft-discipline: см. permissionDecisionReason"}'
+exit 0

@@ -1,0 +1,30 @@
+#!/usr/bin/env bash
+# PostToolUse:Bash — add a concise summary for verbose test/lint output so the
+# agent focuses on failures, not hundreds of PASSED lines. Cross-stack: matches
+# python (pytest/mypy/ruff), JS/TS (vitest/tsc/eslint), .NET (dotnet build/test/
+# format), and the repo's scripts/{test,lint,type}.sh wrappers.
+set -euo pipefail
+
+INPUT=$(cat)
+TOOL_NAME=$(echo "$INPUT" | jq -r '.tool_name // ""')
+[[ "$TOOL_NAME" != "Bash" ]] && exit 0
+
+COMMAND=$(echo "$INPUT" | jq -r '.tool_input.command // ""')
+if ! echo "$COMMAND" | grep -qE '(pytest|vitest|mypy|ruff|eslint|tsc|dotnet (build|test|format)|scripts/(test|lint|type)\.sh)'; then
+  exit 0
+fi
+
+RESPONSE=$(echo "$INPUT" | jq -r '.tool_response // ""')
+LINE_COUNT=$(echo "$RESPONSE" | wc -l)
+[[ "$LINE_COUNT" -lt 80 ]] && exit 0
+
+SUMMARY=$(echo "$RESPONSE" | grep -E '(FAILED|FAIL|ERROR|error|failed|passed|warning|===|short test summary|ERRORS|Build FAILED|Build succeeded|error [A-Z]+[0-9]+)' | head -40)
+FAIL_COUNT=$(echo "$RESPONSE" | grep -cE '(FAILED|FAIL|ERROR|Build FAILED|error [A-Z]+[0-9]+)' || true)
+
+if [ "$FAIL_COUNT" -eq 0 ]; then
+  CONTEXT="[test-filter] All checks passed. Output was ${LINE_COUNT} lines (filtered for brevity)."
+else
+  CONTEXT=$(printf "[test-filter] %d failure lines detected in %d lines of output. Key lines:\n%s" "$FAIL_COUNT" "$LINE_COUNT" "$SUMMARY")
+fi
+
+jq -n --arg ctx "$CONTEXT" '{hookSpecificOutput:{hookEventName:"PostToolUse",additionalContext:$ctx}}'

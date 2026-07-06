@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+# PreToolUse:Grep|Glob — code-graph augmenter (NEVER blocks).
+# Adds codebase-memory-mcp graph context when cbm is available; silent no-op
+# otherwise (e.g. a pure-C# machine without cbm). Any failure → exit 0, no output.
+# Binary path from $CBM_BIN, else ~/.local/bin (win: %USERPROFILE%\.local\bin).
+BIN="${CBM_BIN:-${HOME:-$USERPROFILE}/.local/bin/codebase-memory-mcp}"
+[ -x "$BIN" ] || exit 0
+"$BIN" hook-augment 2>/dev/null
+exit 0

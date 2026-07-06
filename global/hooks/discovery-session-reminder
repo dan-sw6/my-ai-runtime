@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+# SessionStart — remind the agent of the code-discovery protocol (profile-aware).
+cat << 'REMINDER'
+CRITICAL — Code Discovery Protocol:
+1. Use your project's code-discovery MCP FIRST for ANY code exploration:
+   - codebase-memory-mcp (cbm) for Python/TS/Go/... — search_graph / trace_path /
+     get_code_snippet / query_graph / search_code / get_architecture
+   - C# → serena(csharp) or a Roslyn MCP (e.g. CWM.RoslynNavigator): find_symbol /
+     find_references / get_diagnostics
+   - serena is the universal symbol-level fallback (find_symbol / search_for_pattern)
+2. Use Grep/Glob/Read freely for text, configs, non-code files; always Read a file
+   before editing it.
+3. If the code graph is not indexed yet, index it FIRST (cbm index_repository, or let
+   the Roslyn / serena language server load the solution).
+REMINDER
