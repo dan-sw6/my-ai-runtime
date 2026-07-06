@@ -1,0 +1,66 @@
+# runtime.config.yaml — per-product configuration for my-ai-runtime sync
+#
+# Copy this file to your product repo root as `runtime.config.yaml` and fill in
+# the values. `sync/sync-engine.sh` reads it to substitute {{TOKENS}} into synced
+# files (those marked `substitute: true` in sync/manifest.yaml) and to filter
+# entries by active language profile.
+#
+# Anything you omit falls back to an auto-detected or documented default:
+#   {{PROJECT_ROOT}} — auto: `git rev-parse --show-toplevel` of the product repo
+#   {{PROJECT_NAME}} — auto: basename of the product repo (override below if needed)
+#
+# Two consumers read this file:
+#   1. sync-engine.sh  — substitutes tokens at sync time (static values baked in)
+#   2. discipline hooks — read it live at runtime for extensions / discovery tool
+#
+# ---------------------------------------------------------------------------
+
+# Human-readable project name. → {{PROJECT_NAME}}
+# Omit to auto-detect from the repo directory name.
+project_name: my-project
+
+# Target OS of the machine Claude Code runs on. → {{OS}}
+#   linux   — native paths ($HOME, /tmp)
+#   windows — Git Bash; hooks fall back to $USERPROFILE / $TEMP
+# WPF note: WPF builds only on native Windows. Use `windows` + Git Bash, never WSL.
+os: linux
+
+# Active language profiles. Drives which manifest entries + gate commands apply,
+# and which code extensions the discovery-gate guards.
+#   python     — pyright LSP, ruff/pytest/mypy gates, discovery via cbm|serena
+#   typescript — tsserver LSP, tsc/vitest/eslint gates
+#   csharp     — ADOPT mode (see profiles/csharp/adopt.md); dotnet gates,
+#                discovery via serena(csharp) | CWM.RoslynNavigator
+languages: [python]
+
+# --- codebase-memory-mcp (cbm) — optional code-graph discovery backend ---------
+# Leave cbm_project empty ("") to disable cbm entirely (discovery-gate then relaxes
+# for languages that have no other discovery backend configured).
+cbm_project: ""                                  # → {{CBM_PROJECT}}
+cbm_bin: ~/.local/bin/codebase-memory-mcp        # → {{CBM_BIN}} (win: %USERPROFILE%\.local\bin\...)
+
+# Worker / ephemeral state directory (Layer B story machinery; harmless in Layer A).
+# → {{STATE_DIR}}   linux default /tmp/claude-workers · windows %TEMP%\claude-workers
+state_dir: /tmp/claude-workers
+
+# --- Monorepo layout (optional) — only if rules/gates reference app paths --------
+# → {{BACKEND_PATH}} / {{FRONTEND_PATH}} / {{APP_PATHS}} (space-joined)
+paths:
+  backend: ""
+  frontend: ""
+
+# --- Per-language gate commands (override profile defaults) ----------------------
+# {paths} is expanded to the relevant profile's target paths at gate time.
+gates:
+  python:
+    lint: "ruff check {paths}"
+    test: "pytest {paths}"
+    type: "mypy {paths}"
+  typescript:
+    lint: "eslint {paths}"
+    test: "vitest run"
+    type: "tsc --noEmit"
+  csharp:
+    build: "dotnet build"
+    test: "dotnet test"
+    format: "dotnet format --verify-no-changes"
