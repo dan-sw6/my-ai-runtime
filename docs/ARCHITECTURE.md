@@ -219,3 +219,102 @@ User → /implement-story STORY-ID
     │ DECISION  │  PASS → close
     └──────────┘  FAIL → corrective loop (max 2 cycles)
 ```
+
+## Layer B — AO Story-Machinery
+
+`story-machinery/` adds a third, **opt-in** layer on top of the two delivery channels
+described above: a complete closed-loop harness ported and generalized from the
+mgt-openproject `/run-stories` system. Unlike Channels 1/2, which deliver static
+files, Layer B delivers an *executable process* — a state machine that carries a
+story from its frontmatter to a merged PR.
+
+### From SDD's four-phase loop to six harness phases
+
+The 2025–2026 spec-driven-development (SDD) ecosystem converged on one loop:
+**specify → plan → tasks → implement**. This runtime does not reinvent that loop — it
+maps onto it and extends it with the closed-loop discipline the generic loop doesn't
+specify:
+
+| SDD phase | Harness phase(s) | Notes |
+|---|---|---|
+| specify | (product's own — story authored in `docs/stories/STORY-XXX.md`, optionally against SRS.md/EARS ACs) | Outside the harness; standardized but optional (`srs.enabled`) |
+| plan | `0-init` + `1-plan` | `story-planner` subagent decomposes the story into tasks + an AC↔task mapping (`plan.json`) |
+| tasks | (embodied in `plan.json.tasks`) | Not a separate phase — folded into `1-plan`'s output |
+| implement | `2-implement` | `story-executor` subagent per task, fresh context, atomic commits |
+| *(harness-added)* | `2.1.5-simplify`, `2.2-a11y`, `3-gate`, `3.3-audits`, `4-verify`, `5-close` | Not in the generic SDD loop — closed-loop-specific: pre-review cleanup, accessibility pass, quality gates, conditional audits, adversarial AC re-verification, RTM/SRS/memory close-out |
+
+### Phase-contract state machine
+
+Every phase transition is logged as one JSON-line to a phase-log
+(`{"ts","phase","status"}`, `status ∈ {start,complete,skipped,failed,blocked}`) and,
+for the six **major** phases (`0-init`…`5-close`), gated by a state-JSON file
+(`context.json`, `plan.json`, `diff.json`, `gate.json`, `verify.json`, `close.json`)
+carrying a `_complete: true` or `_skipped: true` flag plus phase-specific required
+keys (e.g. `diff.json` requires ≥1 `changed_files` and ≥1 `commits`). `phase-guard.sh`
+refuses to advance past a phase whose state-JSON is missing or incomplete — this is
+what makes `--from-phase`/`--only-phase` retries safe (a corrective re-run of
+`gate`+`verify`+`close` can't silently skip a step that never actually finished).
+Four **micro-phases** (`0.1-mem-search`, `2.1.5-simplify`, `2.2-a11y`, `3.3-audits`)
+skip the state-JSON requirement — they're conditional and cheap to re-derive.
+
+Critically, **the coordinator does not trust a worker's own claims.** A worker
+session could fabricate `gate.json` with `{"pass":true}` via a bare heredoc.
+`worktree-gate.sh` — run by the coordinator, never by the worker — independently
+re-verifies: every commit SHA in `diff.json` actually exists
+(`git rev-parse --verify`), the working tree is clean, and the gate commands from
+`ao.gate_registry` actually pass when re-run. The worker's `gate.json`/`verify.json`
+are recorded for telemetry only; the merge decision is made entirely from the
+coordinator's own re-check.
+
+### Worktree isolation
+
+Each story runs in its own `git worktree` under `ao.worktree_root` (default
+`.claude/worktrees/`), as either a headless `claude -p` session or an
+interactive tmux-attached session. This is what makes `run-stories`' wave
+orchestration possible: N stories with non-conflicting `files_affected` execute as N
+concurrent worker sessions without touching each other's working tree or the trunk,
+and a crashed/killed worker leaves only its own worktree dirty, never the
+coordinator's.
+
+### Config-driven gate registry (vs. the hardcoded original)
+
+The mgt-openproject original called fixed scripts (`lint.sh`/`test.sh`/`type.sh`) —
+fine for one Python+TypeScript monorepo, not portable. The ported harness replaces
+that with `ao.gate_registry`: an ordered list of
+`{match: <changed-path regex>, cmd: <shell command>}` rules (`{gates.X}` tokens
+expanding from the product's own per-language `gates:` block). `worktree-gate.sh`
+walks the list, runs the first matching rule's command against the actual changed
+files, and fails the gate on a non-zero exit. A Python-only repo, a TypeScript-only
+repo, and a `[python, csharp]` mixed repo all express their own gate commands in
+`runtime.config.yaml` without any change to the harness scripts themselves — the same
+config-over-code principle the language `profiles:` mechanism uses elsewhere in this
+runtime.
+
+### Capability gate (delivery mechanism)
+
+Layer B is delivered through the *same* Channel-1 mechanism as language profiles, not
+a separate one: `sync-engine.sh` merges the product's `capabilities:` list into the
+same active-profile set it builds from `languages:`, so a manifest entry tagged
+`profiles: [ao]` is filtered exactly like one tagged `profiles: [typescript]` — active
+only when the product opted in (`bootstrap --with-ao` → `capabilities: [ao]` in
+`runtime.config.yaml`). This is why story-machinery needed no new sync logic:
+`entry_active()`/`lang_active()` in `sync/sync-engine.sh` already generalized to "any
+tag in the active set," and `ao` is just another tag — currently 74 manifest entries
+carry it (46 harness scripts under `scripts/ao/` + `scripts/ao/srs/`, plus the AO
+agents, skills, phase-contract rule/schema, and `rtm.schema.yaml` template).
+
+### The hybrid decision
+
+Layer B **ports** the execution harness — worktree isolation, the phase-contract
+state machine, wave orchestration + monitoring, the config-driven gate registry, and
+the review→auto-fixup loop — because that machinery is hard to replace and not
+something the surrounding SDD-plugin ecosystem (GitHub Spec Kit,
+`sighup/claude-workflow`, `lindy-orchestrator`) provides. It deliberately does **not**
+port mgt-openproject's bespoke SRS/RTM parser wholesale; instead it **standardizes
+and optionalizes** that side: the spec doc stays SRS.md + rtm.yaml (already
+IEEE-830-aligned), authored with EARS acceptance criteria and an `rtm.yaml` shaped to
+the published `rtm-yaml-schema`, gated entirely behind `srs.enabled` so the harness
+runs with zero requirements doc if a product doesn't want one. Because the harness's
+plan→implement loop maps directly onto the specify→plan→tasks→implement loop the
+ecosystem converged on, specs authored by Spec Kit or another SDD tool can feed this
+harness without adapters.

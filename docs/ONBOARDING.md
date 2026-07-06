@@ -205,6 +205,107 @@ from the plugin installed in step 4, and its config lives in `runtime.config.yam
 
 ---
 
+## Run /run-stories in your project
+
+Adds the opt-in AO story-machinery (Layer B) closed-loop harness — a full
+worktree-isolated `/implement-story` / `/run-stories` cycle — on top of a repo
+already onboarded via Case A or Case B above. **Claude Code CLI only** (no
+gemini/codex worker option for this layer) and needs a **real git repository**
+(the harness runs each story in its own `git worktree`).
+
+### 1. Prerequisites
+
+Everything from Case A/B, plus:
+- `jq`, `python3` + PyYAML (config + story-frontmatter parsing)
+- `tmux` (the default worker view — interactive mode)
+- Per-stack gate tooling for whatever `gates.*` commands the product configures
+  (`pytest`/`vitest`/`dotnet`/etc.)
+
+### 2. Run bootstrap with `--with-ao`
+
+```bash
+bash ../mgt-ai-runtime/bootstrap/init-product-repo.sh . --with-ao [--with-srs]
+```
+
+`--with-ao` sets `capabilities: [ao]` in `runtime.config.yaml`; `--with-srs` also
+sets `srs.enabled: true` for the optional SRS.md/rtm.yaml requirements module (seed
+templates: `.claude/templates/srs.md`, `.claude/templates/rtm.schema.yaml`). This
+syncs, in addition to whatever Case A/B already synced:
+- `scripts/ao/*.sh`/`*.py` (harness) + `scripts/ao/srs/*` (if `--with-srs`)
+- `.claude/agents/{story-executor,story-planner,story-auditor,solo-reviewer}.md`
+- `.claude/skills/{implement-story,run-stories}/`
+- `.claude/rules/phase-contract.md` + `.claude/references/phase-contract-schemas.md`
+
+### 3. Review `ao:` / `gate_registry` in `runtime.config.yaml`
+
+Bootstrap only writes `capabilities: [ao]` (+ `srs.enabled` if requested) — it does
+**not** write the full `ao:` block. Copy the relevant keys from
+`config/runtime.config.example.yaml`, at minimum `ao.story_dir`,
+`ao.worker_model`/`worker_effort`, `ao.base_ref`, `ao.gate_registry`:
+
+```yaml
+ao:
+  story_dir: docs/stories
+  worker_model: opus
+  worker_effort: xhigh
+  base_ref: main
+  gate_registry:
+    - { match: '.*', cmd: '{gates.default}' }
+```
+
+Every `ao.*` key you omit falls back to the default baked into each
+`scripts/ao/*.sh` call site (see `config/runtime.config.example.yaml` for the
+documented default of each) — a bare `capabilities: [ao]` with no `ao:` block still
+runs, just against generic defaults.
+
+### 4. Sync
+
+```bash
+bash scripts/sync-ai-runtime.sh --dry-run
+bash scripts/sync-ai-runtime.sh
+```
+
+### 5. Author a story
+
+Create `docs/stories/STORY-101.md`. Frontmatter keys the harness itself reads (via
+`resolve-story-runtime.sh`): `story_points` (diagnostics/routing only — model/effort
+come from `ao.worker_model`/`worker_effort`, not story size), `contour` (module/epic
+tag — surfaces in wave-plan tables and `route_reason` diagnostics), `files_affected`
+(scope lock — the worker may only touch these), `db_impact` (`none` | `migration` —
+`migration` forces the tmux route plus a migrations preflight smoke), `rbac_changes`
+(`true` forces the tmux route regardless of `story_points`):
+
+```yaml
+---
+id: STORY-101
+title: "Add CSV export to the reports page"
+status: draft
+priority: P2
+story_points: 3
+contour: frontend
+depends_on: []
+blocked_by: []
+files_affected:
+  - src/reports/ExportButton.tsx
+  - src/reports/useExport.ts
+db_impact: none
+rbac_changes: false
+requirement_refs: [FR-REPORT-014]   # only if srs.enabled
+---
+```
+
+If `srs.enabled: true`, write acceptance criteria in EARS notation (WHEN/IF/THEN) and
+link them to `docs/SRS.md` entries via `requirement_refs`.
+
+### 6. Run the harness
+
+```bash
+/implement-story STORY-101              # single story, full phase-0..5 cycle
+/run-stories STORY-101 STORY-102         # batch — dependency/conflict waves
+```
+
+---
+
 ## Validate structure (either case)
 
 ```bash

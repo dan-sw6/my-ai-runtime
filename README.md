@@ -210,6 +210,68 @@ build Windows-only MSBuild/.NET Framework targets).
 - Per-stack toolchains for whichever profiles are active: Python (ruff, pytest, mypy),
   Node/TypeScript (tsc, vitest, eslint), .NET SDK 10.0.300+ (csharp profile)
 
+## Layer B — AO story-machinery (opt-in)
+
+`story-machinery/` is a third capability layered on top of the two delivery channels
+above — **opt-in**, not part of the default sync. It's a full closed-loop harness:
+**worktree isolation → phase-contract state machine → wave orchestration →
+config-driven quality gate → review loop → merge**, ported and generalized from the
+mgt-openproject `/run-stories` system. See
+[`story-machinery/README.md`](story-machinery/README.md) for the full design (hybrid
+rationale, layout, the optional SRS/RTM module).
+
+A product opts in via bootstrap:
+
+```bash
+bash <runtime>/bootstrap/init-product-repo.sh . --with-ao [--with-srs]
+```
+
+`--with-ao` sets `capabilities: [ao]` in the generated `runtime.config.yaml`;
+`--with-srs` additionally enables `srs.enabled: true` for the optional SRS.md/rtm.yaml
+requirements module. That's the only thing that changes what syncs — see Capability
+Gating below. Then, from the product repo:
+
+```bash
+/implement-story STORY-XXX          # single story, full phase-0..5 cycle
+/run-stories STORY-A STORY-B ...    # batch — dependency/conflict analysis, waves
+```
+
+### Gate registry
+
+Quality gates are config-driven rather than hardcoded to one stack. `ao.gate_registry`
+in `runtime.config.yaml` is a list of `{match, cmd}` rules — the first whose regex
+matches a changed file wins, and `{gates.X}` tokens expand from the product's own
+`gates:` block:
+
+```yaml
+ao:
+  gate_registry:
+    - { match: '.*', cmd: '{gates.default}' }
+```
+
+A multi-stack monorepo adds more specific rules ahead of the catch-all (e.g. a
+backend-path regex → `{gates.python}`-style commands).
+
+### Capability gating
+
+Same mechanism as the language `profiles:` filter (see Sync Model above):
+`sync-engine.sh` merges `capabilities:` into the active profile set, so manifest
+entries tagged `profiles: [ao]` (harness scripts → `scripts/ao/` + `scripts/ao/srs/`,
+the `story-executor`/`story-planner`/`story-auditor`/`solo-reviewer` agents, the
+`implement-story`/`run-stories` skills, the phase-contract rule + schema, the
+`rtm.schema.yaml` template) only sync into a product that ran `bootstrap --with-ao` —
+every other product's sync is unaffected.
+
+### Requirements (Layer B)
+
+- `git` (worktrees), `bash` (Git Bash on Windows), `jq`
+- `python3` + PyYAML — config + story-frontmatter parsing
+- Claude Code CLI — the only worker engine (the gemini/codex engine branches from the
+  original are intentionally not ported)
+- `tmux` — interactive worker view
+- Per-stack gate tooling as configured in `ao.gate_registry` / `gates.*` (e.g.
+  `pytest`, `vitest`, `dotnet`) — supplied by the product, not this runtime
+
 ## Closed-Loop Delivery
 
 The primary delivery model is Claude-native closed loop (Variant C — skill-as-coordinator):
