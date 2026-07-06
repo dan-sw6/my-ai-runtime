@@ -1,0 +1,117 @@
+{
+  "bash": {
+    "command": "bash-language-server",
+    "args": ["start"],
+    "extensionToLanguage": {
+      ".sh": "shellscript",
+      ".bash": "shellscript",
+      ".zsh": "shellscript"
+    }
+  },
+  "yaml": {
+    "command": "yaml-language-server",
+    "args": ["--stdio"],
+    "extensionToLanguage": {
+      ".yaml": "yaml",
+      ".yml": "yaml"
+    },
+    "settings": {
+      "yaml": {
+        "validate": true,
+        "hover": true,
+        "completion": true,
+        "format": { "enable": false },
+        "schemas": {
+          "https://raw.githubusercontent.com/compose-spec/compose-spec/master/schema/compose-spec.json": [
+            "docker-compose.yml",
+            "docker-compose.yaml",
+            "docker-compose.*.yml",
+            "docker-compose.*.yaml",
+            "compose.yml",
+            "compose.yaml",
+            "**/docker-compose*.yml",
+            "**/docker-compose*.yaml"
+          ],
+          "https://json.schemastore.org/github-workflow.json": [
+            ".github/workflows/*.yml",
+            ".github/workflows/*.yaml"
+          ],
+          "https://json.schemastore.org/github-action.json": [
+            ".github/actions/*/action.yml",
+            ".github/actions/*/action.yaml",
+            "action.yml",
+            "action.yaml"
+          ],
+          "https://json.schemastore.org/pre-commit-config.json": [
+            ".pre-commit-config.yaml",
+            ".pre-commit-config.yml"
+          ],
+          "https://json.schemastore.org/dependabot-2.0.json": [
+            ".github/dependabot.yml",
+            ".github/dependabot.yaml"
+          ]
+        }
+      }
+    }
+  },
+  "json": {
+    "command": "vscode-json-languageserver",
+    "args": ["--stdio"],
+    "extensionToLanguage": {
+      ".json": "json",
+      ".jsonc": "jsonc"
+    },
+    "initializationOptions": {
+      "provideFormatter": false,
+      "handledSchemaProtocols": ["file", "http", "https"]
+    },
+    "settings": {
+      "json": {
+        "validate": { "enable": true },
+        "format": { "enable": false },
+        "schemas": [
+          {
+            "fileMatch": ["package.json", "**/package.json"],
+            "url": "https://json.schemastore.org/package.json"
+          },
+          {
+            "fileMatch": ["tsconfig.json", "tsconfig.*.json", "**/tsconfig.json", "**/tsconfig.*.json"],
+            "url": "https://json.schemastore.org/tsconfig.json"
+          },
+          {
+            "fileMatch": [".eslintrc.json", "**/.eslintrc.json", "**/.eslintrc.*.json"],
+            "url": "https://json.schemastore.org/eslintrc.json"
+          },
+          {
+            "fileMatch": ["**/.prettierrc", "**/.prettierrc.json"],
+            "url": "https://json.schemastore.org/prettierrc.json"
+          },
+          {
+            "fileMatch": ["pyrightconfig.json"],
+            "url": "https://raw.githubusercontent.com/microsoft/pyright/main/packages/vscode-pyright/schemas/pyrightconfig.schema.json"
+          },
+          {
+            "fileMatch": [".claude-plugin/plugin.json", "**/.claude-plugin/plugin.json"],
+            "url": "https://anthropic.com/claude-code/plugin.schema.json"
+          },
+          {
+            "fileMatch": [".claude-plugin/marketplace.json", "**/.claude-plugin/marketplace.json"],
+            "url": "https://anthropic.com/claude-code/marketplace.schema.json"
+          },
+          {
+            "fileMatch": ["renovate.json", ".renovaterc", ".renovaterc.json"],
+            "url": "https://docs.renovatebot.com/renovate-schema.json"
+          }
+        ]
+      }
+    }
+  },
+  "markdown": {
+    "command": "marksman",
+    "args": ["server"],
+    "extensionToLanguage": {
+      ".md": "markdown",
+      ".markdown": "markdown"
+    }
+  }
+}

@@ -1,0 +1,21 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "local-extras",
+  "description": "Local extra LSP servers (bash, yaml, json, markdown)",
+  "owner": {
+    "name": "bogdan"
+  },
+  "plugins": [
+    {
+      "name": "extra-lsp",
+      "description": "Bash + YAML + JSON + Markdown language servers",
+      "version": "1.0.0",
+      "author": {
+        "name": "bogdan"
+      },
+      "source": "./extra-lsp",
+      "category": "development",
+      "strict": false
+    }
+  ]
+}

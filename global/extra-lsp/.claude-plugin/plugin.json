@@ -1,0 +1,9 @@
+{
+  "name": "extra-lsp",
+  "version": "1.2.0",
+  "description": "Bash + YAML + JSON + Markdown LSP servers with schema-aware diagnostics",
+  "author": {
+    "name": "bogdan"
+  },
+  "lspServers": "./.lsp.json"
+}

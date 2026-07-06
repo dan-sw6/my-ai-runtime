@@ -1,0 +1,9 @@
+{
+  "_comment": "Global codebase-memory-mcp (cbm) server entry. Merged into ~/.claude/.mcp.json by install-global.sh ONLY when the cbm binary is present ({{CBM_BIN}} is resolved at install time). cbm is the Python/TS/Go code-discovery backend; a pure-C#/WPF machine can skip it (use serena + a Roslyn MCP instead — see profiles/csharp/adopt.md).",
+  "mcpServers": {
+    "codebase-memory-mcp": {
+      "command": "{{CBM_BIN}}",
+      "args": []
+    }
+  }
+}
