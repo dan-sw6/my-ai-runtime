@@ -1,0 +1,16 @@
+{
+  "_comment": "Per-repo .mcp.json template. Synced (template mode, substitute:true) to the product's root .mcp.json only if missing — never clobbers an existing one. {{CBM_BIN}} is filled from runtime.config.yaml. serena is the universal symbol/edit + LSP layer (Python/TS/C#/... via --project-from-cwd). codebase-memory-mcp is the Python/TS/Go code-graph — a pure-C#/WPF repo can DELETE that entry and instead follow profiles/csharp/adopt.md (serena language=csharp + a Roslyn MCP such as CWM.RoslynNavigator). context7/exa/playwright come from plugins or ~/.claude, not this file.",
+  "mcpServers": {
+    "serena": {
+      "command": "uvx",
+      "args": [
+        "--from", "serena-agent", "serena", "start-mcp-server",
+        "--context", "claude-code", "--project-from-cwd", "--mode", "editing"
+      ]
+    },
+    "codebase-memory-mcp": {
+      "command": "{{CBM_BIN}}",
+      "args": []
+    }
+  }
+}
