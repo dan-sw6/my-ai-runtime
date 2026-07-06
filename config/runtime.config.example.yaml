@@ -64,3 +64,35 @@ gates:
     build: "dotnet build"
     test: "dotnet test"
     format: "dotnet format --verify-no-changes"
+  # Fallback gate command used by the AO gate-registry catch-all rule.
+  default: "echo 'no gate configured'"
+
+# --- AO story-machinery (Layer B) — closed-loop /run-stories harness -------------
+# Only consumed when the AO scripts are synced (bootstrap --with-ao). Read live by
+# story-machinery/scripts/* via lib/runtime-config-read.sh (env vars override).
+ao:
+  story_dir: docs/stories            # where story-<ID>.md files live
+  story_skill_slug: implement-story  # skill each worker runs (/<slug> <ID>)
+  worker_model: opus                 # worker = full Claude Code session (not a subagent) → opus OK
+  worker_effort: xhigh
+  base_ref: main                     # trunk / PR base
+  worktree_root: .claude/worktrees   # per-story git worktree checkout root
+  max_parallel: 3                    # wave concurrency (engine hard-caps at 5)
+  gh_labels: [ai-generated, story]   # labels applied to opened PRs
+  migrations_dir: ""                 # optional; migration preflight checks skipped when empty
+  # Gate registry: first matching changed-path glob picks the gate command
+  # (lindy-orchestrator qa_gates style). {gates.default} expands to gates.default above.
+  gate_registry:
+    - { match: '.*', cmd: '{gates.default}' }
+
+# --- SRS/RTM methodology (Layer B) — OPTIONAL module ----------------------------
+# enabled:false → the story flow skips every SRS/RTM sync step; the harness runs
+# without a requirements doc. Format is SRS.md(human)+rtm.yaml(machine), IEEE-830
+# aligned; acceptance criteria authored in EARS notation (WHEN/IF/THEN).
+srs:
+  enabled: false
+  srs_path: docs/SRS.md
+  archive_path: docs/srs/implemented-archive.md
+  rtm_path: docs/rtm.yaml
+  req_id_prefixes: [FR, NFR, SEC]    # requirement ID taxonomy
+  ac_notation: ears
