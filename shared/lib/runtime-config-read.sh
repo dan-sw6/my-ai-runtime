@@ -1,9 +1,11 @@
 #!/usr/bin/env bash
-# runtime-config-read.sh — sourced helper for the AO story-machinery.
+# runtime-config-read.sh — sourced helper for my-ai-runtime scripts.
 #
-# Centralises reading of the product's runtime.config.yaml so every harness script
-# resolves paths/slugs/models/gates the same way, with env-var override and a safe
-# default when the key, file, python, or PyYAML is missing.
+# Shared by the core quality-gate runner (scripts/run-gates.sh) and, when the AO
+# capability is synced, the story-machinery harness (scripts/ao/*). Centralises
+# reading of the product's runtime.config.yaml so every script resolves
+# paths/slugs/models/gates the same way, with env-var override and a safe default
+# when the key, file, python, or PyYAML is missing.
 #
 #   source "$(dirname "${BASH_SOURCE[0]}")/runtime-config-read.sh"
 #   STORY_DIR="$(rcfg ao.story_dir docs/stories)"     # env AO_STORY_DIR wins

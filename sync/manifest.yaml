@@ -66,6 +66,37 @@ entries:
     target: .claude/agents/prompter.md
     mode: seed
 
+  # --- Layer C: generic analysis / review / research agents (seed) ---
+  - source: claude/agents/_base/code-explorer.md
+    target: .claude/agents/code-explorer.md
+    mode: seed
+
+  - source: claude/agents/_base/code-architect.md
+    target: .claude/agents/code-architect.md
+    mode: seed
+
+  - source: claude/agents/_base/code-simplifier.md
+    target: .claude/agents/code-simplifier.md
+    mode: seed
+
+  - source: claude/agents/_base/silent-failure-hunter.md
+    target: .claude/agents/silent-failure-hunter.md
+    mode: seed
+
+  - source: claude/agents/_base/type-design-analyzer.md
+    target: .claude/agents/type-design-analyzer.md
+    mode: seed
+
+  - source: claude/agents/_base/web-researcher.md
+    target: .claude/agents/web-researcher.md
+    mode: seed
+
+  # DB-migration reviewer — only useful where a migration toolchain exists.
+  - source: claude/agents/_base/migration-reviewer.md
+    target: .claude/agents/migration-reviewer.md
+    mode: seed
+    profiles: [python]
+
   # === Claude Skills (seed) ===
   - source: claude/skills/verify-story/SKILL.md
     target: .claude/skills/verify-story.md
@@ -87,6 +118,18 @@ entries:
 
   - source: shared/quality-gates/mcp-matrix.yaml
     target: .claude/quality-gates/mcp-matrix.yaml
+    mode: managed
+
+  # === Core scripts (managed — config-driven, not capability-gated) ===
+  # Shared config reader — also re-synced into scripts/ao/ for the AO harness (below).
+  - source: shared/lib/runtime-config-read.sh
+    target: scripts/lib/runtime-config-read.sh
+    mode: managed
+
+  # Portable quality-gate runner — the config-driven replacement for a hand-written
+  # lint.sh/test.sh/type.sh; reads gates.<lang>.<kind> from runtime.config.yaml.
+  - source: shared/quality-gates/run-gates.sh
+    target: scripts/run-gates.sh
     mode: managed
 
   # === Rules (managed — runtime owns these) ===
@@ -292,7 +335,7 @@ entries:
     target: scripts/ao/resolve-story-runtime.sh
     mode: managed
     profiles: [ao]
-  - source: story-machinery/scripts/runtime-config-read.sh
+  - source: shared/lib/runtime-config-read.sh
     target: scripts/ao/runtime-config-read.sh
     mode: managed
     profiles: [ao]
