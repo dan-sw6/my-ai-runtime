@@ -79,10 +79,13 @@ ao:
   worktree_root: .claude/worktrees   # per-story git worktree checkout root
   max_parallel: 3                    # wave concurrency (engine hard-caps at 5)
   gh_labels: [ai-generated, story]   # labels applied to opened PRs
+  review_agents: [code-reviewer]     # subagents launch-review-worker.sh spawns for post-merge review
+  fixup_contour: tooling              # contour/epic tag for auto-generated review-fixup stories
   migrations_dir: ""                 # optional; migration preflight checks skipped when empty
   worker_bot_name: ""                # git author for worker commits (empty → repo default)
   worker_bot_email: ""
   prepare_hook: ""                   # optional shell run in a fresh worktree after prep (e.g. "npm ci")
+  worktree_branch_pattern: 'worktree-STORY-*'   # branch glob for worktree hygiene/cleanup
   # Gate registry: first matching changed-path glob picks the gate command
   # (lindy-orchestrator qa_gates style). {gates.default} expands to gates.default above.
   gate_registry:
@@ -99,3 +102,5 @@ srs:
   rtm_path: docs/rtm.yaml
   req_id_prefixes: [FR, NFR, SEC]    # requirement ID taxonomy
   ac_notation: ears
+  decisions_path: docs/DECISIONS.md  # optional; ADR/decisions doc for task-context packets
+  plan_path: docs/PLAN.md            # optional; plan doc for task-context packets
