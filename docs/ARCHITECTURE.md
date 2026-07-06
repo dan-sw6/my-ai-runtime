@@ -318,3 +318,44 @@ runs with zero requirements doc if a product doesn't want one. Because the harne
 plan→implement loop maps directly onto the specify→plan→tasks→implement loop the
 ecosystem converged on, specs authored by Spec Kit or another SDD tool can feed this
 harness without adapters.
+
+## Layer C — Portable Quality Gates & Generic Agents
+
+Layer C is not a new capability like B — it's the **non-AO remainder** of the
+mgt-openproject dev tooling, generalized and delivered through the plain Channel-1
+sync (no capability gate). Two pieces:
+
+### `run-gates.sh` — config-over-code gate runner
+
+mgt-openproject ran fixed `lint.sh`/`test.sh`/`type.sh` scripts. Those don't port —
+they encode one repo's toolchain. `run-gates.sh` replaces them with a runner that
+reads `gates.<language>.<kind>` from `runtime.config.yaml` and executes each command
+for every language in `languages:`, expanding `{paths}` (the profile's target paths)
+and `{gates.X}` tokens, aggregating a non-zero exit if any gate fails. The runner is
+**identical** across a Python repo, a TypeScript repo, and a `[python, csharp]` mixed
+repo; only the config differs. Note this is a *different* mechanism from Layer B's
+`ao.gate_registry`: run-gates is **per-language-profile** and always present, whereas
+the gate-registry is **per-changed-file-glob** and only synced with the AO capability
+— the harness uses the registry to pick a gate for a specific diff, while run-gates is
+the everyday "run my project's checks" entry point.
+
+The config reader both share (`runtime-config-read.sh`) lives once in `shared/lib/`
+and is synced to two targets — `scripts/lib/` for run-gates (core) and, when AO is
+active, `scripts/ao/` as a flat-bundle sibling for the harness. One source, two
+install paths.
+
+### Generic agents (`_base/` → seed)
+
+The runtime seeds a roster of language-agnostic analysis/review agents ported from
+mgt and stripped of domain coupling: `code-explorer`, `code-architect`,
+`code-simplifier`, `silent-failure-hunter`, `type-design-analyzer`, `web-researcher`,
+and `migration-reviewer`. The generalization pattern is uniform: a provenance comment,
+`model: sonnet` (never opus — subagent cost discipline), the shared MCP-discipline
+block, and `tools:` trimmed to what the agent needs (e.g. web-researcher keeps exa +
+context7 and drops cbm; the code-analysis agents drop postgres/playwright).
+`migration-reviewer` carries `profiles: [python]` because a migration reviewer is
+only useful where a migration toolchain exists; the rest are core. Frontend/redesign
+agents from mgt (`canon-compliance-auditor`, `mock-scout`, `page-redesign-scout`,
+`redesign-verifier`, `tailwind-bem-cleaner`) are **deliberately not ported** — each is
+inert without its `/redesign-page` or `/decompose-mock` skill, and those web-only
+skills aren't part of this runtime.

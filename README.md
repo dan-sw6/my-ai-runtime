@@ -108,6 +108,32 @@ A product enables profiles by listing them in `languages:` in its own
 Multiple profiles combine freely (e.g. `[python, typescript]` for a full-stack web
 repo, `[python, csharp]` for a Python-ML + WPF-client repo).
 
+## Quality Gates (`run-gates.sh`)
+
+The **Gates** column above is not hardcoded into any script — it's the product's own
+`gates:` block in `runtime.config.yaml`. `scripts/run-gates.sh` (synced to every
+product, no capability needed) is the config-driven runner that replaces a
+hand-written `lint.sh`/`test.sh`/`type.sh`:
+
+```bash
+bash scripts/run-gates.sh          # every gate kind for each active language
+bash scripts/run-gates.sh type     # just the `type` gate, each active language
+```
+
+It reads `gates.<language>.<kind>` for each language in `languages:`, expands
+`{paths}` (→ that profile's target paths) and `{gates.X}` tokens, runs each command,
+and exits non-zero if any fail. A Python repo, a TypeScript repo, and a
+`[python, csharp]` mixed repo each express their own commands in config — the runner
+itself never changes. (The AO harness's per-changed-file `ao.gate_registry` is a
+separate, capability-gated mechanism — see Layer B.)
+
+Alongside the runner, the runtime seeds a roster of **generic analysis/review
+agents** — `code-explorer`, `code-architect`, `code-simplifier`,
+`silent-failure-hunter`, `type-design-analyzer`, `web-researcher`, and
+`migration-reviewer` (the last only under the `python` profile) — all `model: sonnet`
+with the MCP-discipline contract baked in. They are `seed` mode: created once, then
+yours to customize.
+
 ## Sync Model (Channel 1 — per-repo)
 
 Sync is **one-way**: runtime → product. Three modes, plus two optional per-entry
