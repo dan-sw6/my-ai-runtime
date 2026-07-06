@@ -80,6 +80,9 @@ ao:
   max_parallel: 3                    # wave concurrency (engine hard-caps at 5)
   gh_labels: [ai-generated, story]   # labels applied to opened PRs
   migrations_dir: ""                 # optional; migration preflight checks skipped when empty
+  worker_bot_name: ""                # git author for worker commits (empty → repo default)
+  worker_bot_email: ""
+  prepare_hook: ""                   # optional shell run in a fresh worktree after prep (e.g. "npm ci")
   # Gate registry: first matching changed-path glob picks the gate command
   # (lindy-orchestrator qa_gates style). {gates.default} expands to gates.default above.
   gate_registry:
