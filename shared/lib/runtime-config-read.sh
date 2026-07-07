@@ -29,6 +29,7 @@ _rcfg_py() {
   command -v python3 >/dev/null 2>&1 || { printf '%s' "$def"; return 0; }
   python3 - "$RCFG_FILE" "$key" "$def" <<'PY'
 import sys
+sys.stdout.reconfigure(newline="\n")   # Windows: don't translate \n -> \r\n (breaks callers)
 path, key = sys.argv[1], sys.argv[2]
 default = sys.argv[3] if len(sys.argv) > 3 else ""
 try:
@@ -61,7 +62,7 @@ PY
 # rcfg <dotted.key> [default] — scalar value; env var (AO_STORY_DIR for ao.story_dir) wins.
 rcfg() {
   local key="$1" def="${2:-}" env_name
-  env_name="$(printf '%s' "$key" | tr 'a-z.-' 'A-Z__')"
+  env_name="$(printf '%s' "$key" | tr -d '\r' | tr 'a-z.-' 'A-Z__')"
   if [[ -n "${!env_name:-}" ]]; then printf '%s' "${!env_name}"; return 0; fi
   _rcfg_py "$key" "$def"
 }
@@ -77,6 +78,7 @@ rcfg_list() {
   local json; json="$(_rcfg_py "$1" "[]")"
   command -v python3 >/dev/null 2>&1 || return 0
   printf '%s' "$json" | python3 -c 'import sys,json
+sys.stdout.reconfigure(newline="\n")
 try: v=json.load(sys.stdin)
 except Exception: v=[]
 [print(x) for x in (v or [])]' 2>/dev/null || true
